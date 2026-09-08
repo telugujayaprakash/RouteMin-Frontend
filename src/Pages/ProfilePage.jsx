@@ -5,24 +5,26 @@ import {
   User,
   EnvelopeSimple,
   LockKey,
+  ShieldCheck,
   Key,
   Eye,
   EyeSlash,
   CheckCircle,
   WarningCircle,
   PaperPlaneRight,
+  Sparkle,
+  Copy,
+  Check,
+  Crown,
   CreditCard,
-  Phone
+  Phone,
+  ArrowRight
 } from '@phosphor-icons/react'
 import InvoiceTable from '../Components/InvoiceTable'
-import {
-  forgotPassword,
-  verifyOtp,
-  resetPassword
-} from '../Redux/Auth/AuthSlice'
+import { forgotPassword, verifyOtp, resetPassword } from '../Redux/Auth/AuthSlice'
 import profileBanner from '../Assets/profileBanner.png'
 
-function ProfilePage () {
+function ProfilePage() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const user = useSelector(state => state.Auth?.user)
@@ -183,9 +185,7 @@ function ProfilePage () {
 
     setLoading(true)
     try {
-      await dispatch(
-        verifyOtp({ email: user?.email, otp: otpCode.trim() })
-      ).unwrap()
+      await dispatch(verifyOtp({ email: user?.email, otp: otpCode.trim() })).unwrap()
 
       const res = await dispatch(
         resetPassword({
@@ -197,8 +197,7 @@ function ProfilePage () {
 
       setMessage({
         type: 'success',
-        text:
-          res?.message || 'Password successfully reset via OTP verification!'
+        text: res?.message || 'Password successfully reset via OTP verification!'
       })
       setOtpCode('')
       setOtpNewPassword('')
@@ -222,31 +221,22 @@ function ProfilePage () {
       ===================================================== */}
       <div className='relative overflow-hidden rounded-3xl text-white shadow-md'>
         {/* Decorative Glow */}
-        <img src={profileBanner} alt='' />
+        <img src={profileBanner} alt="" />
       </div>
 
       {/* Alert Notification */}
       {message.text && (
         <div
-          className={`p-4 rounded-2xl text-xs font-bold flex items-center justify-between gap-3 shadow-xs transition-all ${
-            message.type === 'error'
-              ? 'bg-rose-50 border border-rose-200 text-rose-800'
-              : 'bg-emerald-50 border border-emerald-200 text-emerald-900'
-          }`}
+          className={`p-4 rounded-2xl text-xs font-bold flex items-center justify-between gap-3 shadow-xs transition-all ${message.type === 'error'
+            ? 'bg-rose-50 border border-rose-200 text-rose-800'
+            : 'bg-emerald-50 border border-emerald-200 text-emerald-900'
+            }`}
         >
           <div className='flex items-center gap-2.5'>
             {message.type === 'error' ? (
-              <WarningCircle
-                size={20}
-                weight='fill'
-                className='text-rose-600 shrink-0'
-              />
+              <WarningCircle size={20} weight='fill' className='text-rose-600 shrink-0' />
             ) : (
-              <CheckCircle
-                size={20}
-                weight='fill'
-                className='text-emerald-600 shrink-0'
-              />
+              <CheckCircle size={20} weight='fill' className='text-emerald-600 shrink-0' />
             )}
             <span>{message.text}</span>
           </div>
@@ -267,11 +257,10 @@ function ProfilePage () {
         <button
           type='button'
           onClick={() => setActiveTab('profile')}
-          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-            activeTab === 'profile'
-              ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/20'
-              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-          }`}
+          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${activeTab === 'profile'
+            ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/20'
+            : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+            }`}
         >
           <User size={16} weight='duotone' />
           <span>Profile Overview</span>
@@ -280,11 +269,10 @@ function ProfilePage () {
         <button
           type='button'
           onClick={() => setActiveTab('security')}
-          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-            activeTab === 'security'
-              ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/20'
-              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-          }`}
+          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${activeTab === 'security'
+            ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/20'
+            : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+            }`}
         >
           <LockKey size={16} weight='duotone' />
           <span>Security & Credentials</span>
@@ -293,11 +281,10 @@ function ProfilePage () {
         <button
           type='button'
           onClick={() => setActiveTab('billing')}
-          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-            activeTab === 'billing'
-              ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/20'
-              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-          }`}
+          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${activeTab === 'billing'
+            ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/20'
+            : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+            }`}
         >
           <CreditCard size={16} weight='duotone' />
           <span>Billing & Invoices</span>
@@ -328,23 +315,17 @@ function ProfilePage () {
                 </label>
                 <div className='flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/70 text-slate-900 font-semibold'>
                   <User size={18} className='text-slate-400 shrink-0' />
-                  <span>
-                    {user?.fullName || user?.name || 'Authorized User'}
-                  </span>
+                  <span>{user?.fullName || user?.name || 'Authorized User'}</span>
                 </div>
               </div>
 
               {/* Email */}
               <div>
                 <label className='block text-slate-500 text-[11px] font-bold uppercase tracking-wider mb-1.5'>
-                  Email Address{' '}
-                  <span className='text-slate-400 font-normal'>(Primary)</span>
+                  Email Address <span className='text-slate-400 font-normal'>(Primary)</span>
                 </label>
                 <div className='flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/70 text-slate-900 font-mono font-medium'>
-                  <EnvelopeSimple
-                    size={18}
-                    className='text-slate-400 shrink-0'
-                  />
+                  <EnvelopeSimple size={18} className='text-slate-400 shrink-0' />
                   <span>{user?.email || 'user@routemin.com'}</span>
                 </div>
               </div>
@@ -356,9 +337,7 @@ function ProfilePage () {
                 </label>
                 <div className='flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/70 text-slate-900 font-semibold'>
                   <Phone size={18} className='text-slate-400 shrink-0' />
-                  <span>
-                    {user?.mobile || user?.phoneNo || '+91 98765 43210'}
-                  </span>
+                  <span>{user?.mobile || user?.phoneNo || '+91 98765 43210'}</span>
                 </div>
               </div>
             </div>
@@ -379,8 +358,7 @@ function ProfilePage () {
                   Password & Security Settings
                 </h3>
                 <p className='text-xs text-slate-500 font-medium'>
-                  Update your access credentials or perform OTP-based password
-                  recovery.
+                  Update your access credentials or perform OTP-based password recovery.
                 </p>
               </div>
             </div>
@@ -402,10 +380,7 @@ function ProfilePage () {
 
           {/* MODE 1: DIRECT PASSWORD CHANGE */}
           {passwordMode === 'direct' ? (
-            <form
-              onSubmit={handleDirectPasswordChange}
-              className='space-y-4 text-xs'
-            >
+            <form onSubmit={handleDirectPasswordChange} className='space-y-4 text-xs'>
               {/* Current Password */}
               <div>
                 <label className='block text-slate-700 font-bold mb-1.5'>
@@ -424,11 +399,7 @@ function ProfilePage () {
                     onClick={() => setShowCurrentPass(!showCurrentPass)}
                     className='absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer'
                   >
-                    {showCurrentPass ? (
-                      <EyeSlash size={16} />
-                    ) : (
-                      <Eye size={16} />
-                    )}
+                    {showCurrentPass ? <EyeSlash size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
@@ -460,9 +431,7 @@ function ProfilePage () {
                   <div className='mt-2.5 space-y-1.5'>
                     <div className='flex items-center justify-between text-[11px] font-semibold text-slate-500'>
                       <span>Password Strength</span>
-                      <span className='font-bold text-slate-700'>
-                        {passwordStrength.label}
-                      </span>
+                      <span className='font-bold text-slate-700'>{passwordStrength.label}</span>
                     </div>
                     <div className='h-1.5 w-full bg-slate-100 rounded-full overflow-hidden'>
                       <div
@@ -509,10 +478,7 @@ function ProfilePage () {
             </form>
           ) : (
             /* MODE 2: OTP FLOW */
-            <form
-              onSubmit={handleOtpResetPassword}
-              className='space-y-4 text-xs'
-            >
+            <form onSubmit={handleOtpResetPassword} className='space-y-4 text-xs'>
               {!otpSent ? (
                 <div className='p-5 rounded-2xl bg-blue-50/70 border border-blue-200/80 space-y-3'>
                   <div className='flex items-center gap-2 text-blue-900 font-bold text-sm'>
@@ -520,12 +486,8 @@ function ProfilePage () {
                     <span>Request OTP Verification Code</span>
                   </div>
                   <p className='text-xs text-slate-600 leading-relaxed'>
-                    Click below to send a 6-digit verification OTP code to your
-                    registered email address ({' '}
-                    <strong className='text-slate-900 font-mono'>
-                      {user?.email || 'your email'}
-                    </strong>{' '}
-                    ).
+                    Click below to send a 6-digit verification OTP code to your registered email address ({' '}
+                    <strong className='text-slate-900 font-mono'>{user?.email || 'your email'}</strong> ).
                   </p>
                   <button
                     type='button'
@@ -568,8 +530,7 @@ function ProfilePage () {
 
                   <div>
                     <label className='block text-slate-700 font-bold mb-1.5'>
-                      Confirm New Password{' '}
-                      <span className='text-rose-500'>*</span>
+                      Confirm New Password <span className='text-rose-500'>*</span>
                     </label>
                     <input
                       type='password'
@@ -595,9 +556,7 @@ function ProfilePage () {
                       className='inline-flex items-center justify-center gap-2 h-10 px-6 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-colors shadow-sm cursor-pointer disabled:opacity-50'
                     >
                       <CheckCircle size={16} weight='bold' />
-                      <span>
-                        {loading ? 'Resetting...' : 'Verify OTP & Reset'}
-                      </span>
+                      <span>{loading ? 'Resetting...' : 'Verify OTP & Reset'}</span>
                     </button>
                   </div>
                 </>
