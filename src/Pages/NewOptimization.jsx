@@ -25,6 +25,7 @@ import OptimisationImg from '../Assets/OptimisationImg.png'
 import { runOptimization } from '../Redux/Optimisation/OptimisationSlice'
 import { fetchwarehouse } from '../Redux/Warehouse/WarehouseSlice'
 import { fetchfactory } from '../Redux/Factory/FactorySlice'
+import toast from 'react-hot-toast'
 
 function NewOptimization () {
   const dispatch = useDispatch()
@@ -272,7 +273,8 @@ function NewOptimization () {
   ============================================================ */
 
   const handleMatrixNext = routesList => {
-    const activeRoutes = (routesList && routesList.length > 0) ? routesList : routes
+    const activeRoutes =
+      routesList && routesList.length > 0 ? routesList : routes
 
     if (!activeRoutes || activeRoutes.length === 0) {
       const fallbackRoutes = selectedFactories.flatMap(f =>
@@ -334,10 +336,18 @@ function NewOptimization () {
       const response = await dispatch(runOptimization(payload)).unwrap()
 
       if (response?.optimizationRunId) {
-        navigate(`/result/${response.optimizationRunId}`)
+        toast.success('Optimization completed successfully.')
+        navigate(`/result/${response.optimizationRunId}`, {
+          state: { activeSidebarPath: '/new-optimization' }
+        })
       }
     } catch (error) {
       console.error('Optimization failed:', error)
+      toast.error(
+        typeof error === 'string'
+          ? error
+          : error?.message || 'Optimization failed. Please try again.'
+      )
     }
   }
 
@@ -408,7 +418,9 @@ function NewOptimization () {
           const valStr = warehouse.demand
           const valNum = Number(valStr)
           const maxCap = Number(
-            warehouse.maximumStorageCapacity || warehouse.maximumDemand || Infinity
+            warehouse.maximumStorageCapacity ||
+              warehouse.maximumDemand ||
+              Infinity
           )
           return (
             valStr !== '' &&
@@ -466,7 +478,8 @@ function NewOptimization () {
 
     /* STEP 3 */
 
-    const canContinue = selectedFactories.length > 0 && selectedWarehouses.length > 0
+    const canContinue =
+      selectedFactories.length > 0 && selectedWarehouses.length > 0
 
     return (
       <BottomBar>

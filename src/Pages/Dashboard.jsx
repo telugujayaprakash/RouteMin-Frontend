@@ -34,9 +34,11 @@ function Dashboard() {
 
   const summary = overview?.summary || {}
   const mostUsedAlgorithm =
-    overview?.algorithmUsage?.reduce((prev, current) =>
-      current.count > prev.count ? current : prev
-    )
+    Array.isArray(overview?.algorithmUsage) && overview.algorithmUsage.length > 0
+      ? overview.algorithmUsage.reduce((prev, current) =>
+          (current?.count || 0) > (prev?.count || 0) ? current : prev
+        )
+      : null
 
 
   const formatCurrency = value =>

@@ -44,7 +44,10 @@ function FactoryModal({
         country: initialData.country || 'India',
         latitude: initialData.latitude ?? '',
         longitude: initialData.longitude ?? '',
-        maximumSupplyCapacity: initialData.maximumSupplyCapacity ?? '',
+        maximumSupplyCapacity:
+          initialData.maximumSupplyCapacity ??
+          initialData.supply ??
+          '',
         status: initialData.status || 'ACTIVE'
       })
     } else {
@@ -131,6 +134,7 @@ function FactoryModal({
 
     if (!validate()) return
 
+    const capacity = Number(formData.maximumSupplyCapacity)
     const payload = {
       factoryCode: formData.factoryCode.trim(),
       registrationNumber: formData.registrationNumber.trim(),
@@ -140,7 +144,8 @@ function FactoryModal({
       country: formData.country || 'India',
       latitude: Number(formData.latitude),
       longitude: Number(formData.longitude),
-      maximumSupplyCapacity: Number(formData.maximumSupplyCapacity),
+      maximumSupplyCapacity: capacity,
+      supply: capacity,
       status: formData.status
     }
 

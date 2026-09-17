@@ -18,7 +18,7 @@ import {
 } from '@phosphor-icons/react'
 import Button from './UI/Button'
 
-function Sidebar() {
+function Sidebar () {
   const location = useLocation()
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -68,8 +68,6 @@ function Sidebar() {
       url: '/pricing'
     }
   ]
-
-  const isResultPage = location.pathname.startsWith('/result')
 
   return (
     <>
@@ -221,8 +219,6 @@ function Sidebar() {
             <nav className='p-4 md:px-2.5 lg:p-4'>
               <ul className='space-y-1.5'>
                 {navItems.map(({ pageName, icon: Icon, url }) => {
-                  const isHistoryTab = url === '/optimization-history'
-
                   return (
                     <li key={url}>
                       <NavLink
@@ -232,7 +228,8 @@ function Sidebar() {
                       >
                         {({ isActive }) => {
                           const active =
-                            isActive || (isResultPage && isHistoryTab)
+                            isActive ||
+                            location.state?.activeSidebarPath === url
 
                           return (
                             <Button
@@ -312,13 +309,14 @@ function Sidebar() {
                 md:justify-center
                 lg:justify-start
 
-                ${isProfileOpen
-                  ? `
+                ${
+                  isProfileOpen
+                    ? `
                       border-blue-200
                       bg-blue-50/70
                       shadow-sm
                     `
-                  : `
+                    : `
                       border-slate-200/80
                       bg-slate-50/80
                       hover:border-slate-300
@@ -340,9 +338,10 @@ function Sidebar() {
                   text-xs
                   transition-colors
 
-                  ${isProfileOpen
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-blue-100 text-blue-600'
+                  ${
+                    isProfileOpen
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-blue-100 text-blue-600'
                   }
                 `}
               >

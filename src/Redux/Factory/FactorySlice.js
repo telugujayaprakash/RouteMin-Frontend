@@ -31,9 +31,10 @@ export const postfactory = createAsyncThunk("factory/postfactory", async (factor
 });
 
 //Update Factory Slice
-export const updatefactory = createAsyncThunk("factory/updatefactory", async ({ id, factoryData }, { rejectWithValue }) => {
+export const updatefactory = createAsyncThunk("factory/updatefactory", async ({ id, factoryData, data }, { rejectWithValue }) => {
     try {
-        const response = await api.put(`/api/v1/factories/${id}`, factoryData);
+        const payload = factoryData || data;
+        const response = await api.put(`/api/v1/factories/${id}`, payload);
         return response.data;
     } catch (error) {
         return rejectWithValue(
@@ -106,7 +107,21 @@ const FactorySlice = createSlice({
             })
             .addCase(updatefactory.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.factories = action.payload;
+                state.error = null;
+                if (Array.isArray(action.payload)) {
+                    state.factories = action.payload;
+                } else if (action.payload && typeof action.payload === 'object') {
+                    const updated = action.payload.factory || action.payload.data || action.payload;
+                    const id = updated.id || updated._id;
+                    if (id && Array.isArray(state.factories)) {
+                        const index = state.factories.findIndex(f => (f.id || f._id) === id);
+                        if (index !== -1) {
+                            state.factories[index] = updated;
+                        } else {
+                            state.factories.push(updated);
+                        }
+                    }
+                }
             })
             .addCase(updatefactory.rejected, (state, action) => {
                 state.isLoading = false;
@@ -121,7 +136,15 @@ const FactorySlice = createSlice({
             })
             .addCase(deletefactory.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.factories = action.payload;
+                state.error = null;
+                if (Array.isArray(action.payload)) {
+                    state.factories = action.payload;
+                } else if (Array.isArray(state.factories)) {
+                    const deleteId = action.meta?.arg?.id;
+                    if (deleteId) {
+                        state.factories = state.factories.filter(f => (f.id || f._id) !== deleteId);
+                    }
+                }
             })
             .addCase(deletefactory.rejected, (state, action) => {
                 state.isLoading = false;

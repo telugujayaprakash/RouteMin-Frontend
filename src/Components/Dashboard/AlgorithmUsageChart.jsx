@@ -19,7 +19,8 @@ const ALGORITHM_COLORS = {
 const COLOR_PALETTE = ['#2563EB', '#10B981', '#8B5CF6', '#F59E0B', '#06B6D4', '#EC4899']
 
 function AlgorithmUsageChart({ data = [] }) {
-  const chartData = data.map((item, idx) => {
+  const safeData = Array.isArray(data) ? data : []
+  const chartData = safeData.map((item, idx) => {
     const key = String(item.algorithm || '').toUpperCase()
     const color = ALGORITHM_COLORS[key] || COLOR_PALETTE[idx % COLOR_PALETTE.length]
     return {

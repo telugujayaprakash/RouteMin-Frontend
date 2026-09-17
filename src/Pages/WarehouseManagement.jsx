@@ -21,10 +21,12 @@ import { deletewarehouse } from '../Redux/Warehouse/WarehouseSlice'
 import LoadingComponent from '../Components/LoadingComponent'
 import WarehouseModal from '../Components/Entities/WarehouseModel'
 import { Icon } from '@iconify/react'
+import toast from 'react-hot-toast'
 
 function WarehouseManagement () {
   const dispatch = useDispatch()
-  const warehouses = useSelector(state => state.Warehouse.warehouses)
+  const rawWarehouses = useSelector(state => state.Warehouse.warehouses)
+  const warehouses = Array.isArray(rawWarehouses) ? rawWarehouses : []
   const isLoading = useSelector(state => state.Warehouse.isLoading)
   const error = useSelector(state => state.Warehouse.error)
 
@@ -36,13 +38,13 @@ function WarehouseManagement () {
 
   useEffect(() => {
     dispatch(fetchwarehouse())
-  }, [])
+  }, [dispatch])
 
-  const handleEditWarehouse = factory => {
+  const handleEditWarehouse = warehouse => {
     setwarehouseModal({
       open: true,
       mode: 'edit',
-      factory
+      warehouse
     })
   }
 
@@ -57,7 +59,9 @@ function WarehouseManagement () {
   ).length
 
   const totalDemand = warehouses.reduce(
-    (total, warehouse) => total + Number(warehouse.maximumDemand ?? 0),
+    (total, warehouse) =>
+      total +
+      Number(warehouse.maximumStorageCapacity ?? warehouse.maximumDemand ?? 0),
     0
   )
 
@@ -74,25 +78,37 @@ function WarehouseManagement () {
     try {
       if (warehouseModal.mode === 'add') {
         await dispatch(postwarehouse(data)).unwrap()
-        console.log('hi')
+        toast.success('Warehouse created successfully.')
       } else {
+        const warehouseId =
+          warehouseModal.warehouse?.id ||
+          warehouseModal.warehouse?._id ||
+          warehouseModal.factory?.id ||
+          warehouseModal.factory?._id
+
         await dispatch(
           updatewarehouse({
-            id: factoryModal.factory.id,
+            id: warehouseId,
+            warehouseData: data,
             data
           })
         ).unwrap()
-        console.log('hi')
+        toast.success('Warehouse updated successfully.')
       }
 
       setwarehouseModal({
         open: false,
         mode: 'add',
-        factory: null
+        warehouse: null
       })
       dispatch(fetchwarehouse())
     } catch (error) {
       console.error('Warehouse save failed:', error)
+      toast.error(
+        typeof error === 'string'
+          ? error
+          : error?.message || 'Unable to save warehouse. Please try again.'
+      )
     }
   }
 
@@ -119,7 +135,7 @@ function WarehouseManagement () {
               setwarehouseModal({
                 open: true,
                 mode: 'add',
-                factory: null
+                warehouse: null
               })
             }
             className='inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-xs shadow-blue-600/20 transition-all hover:bg-blue-700 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 cursor-pointer'
@@ -180,13 +196,14 @@ function WarehouseManagement () {
             <WarehouseModal
               isOpen={warehouseModal.open}
               mode={warehouseModal.mode}
-              initialData={warehouseModal.factory}
+              initialData={warehouseModal.warehouse || warehouseModal.factory}
               onSubmit={handleWarehouseSubmit}
+              isSubmitting={isLoading}
               onClose={() =>
                 setwarehouseModal({
                   open: false,
                   mode: 'add',
-                  factory: null
+                  warehouse: null
                 })
               }
             />

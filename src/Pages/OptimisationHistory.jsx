@@ -1,14 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { MagnifyingGlassIcon, ArrowsClockwiseIcon, CurrencyInrIcon } from '@phosphor-icons/react'
+import {
+  MagnifyingGlassIcon,
+  ArrowsClockwiseIcon,
+  CurrencyInrIcon
+} from '@phosphor-icons/react'
 import ErrorCard from '../Components/ErrorCard'
 import StatCard from '../Components/StatCard'
 import OptimizationHistoryTable from '../Components/OptimizationHistoryTable'
 import LoadingComponent from '../Components/LoadingComponent'
 import { fetchOptimizationHistory } from '../Redux/Optimisation/OptimisationSlice'
 
-function OptimizationHistory() {
+function OptimizationHistory () {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
@@ -70,7 +74,9 @@ function OptimizationHistory() {
   }
 
   const handleView = item => {
-    navigate(`/result/${item.optimizationRunId}`)
+    navigate(`/result/${item.optimizationRunId}`, {
+      state: { activeSidebarPath: '/optimization-history' }
+    })
   }
 
   return (

@@ -12,6 +12,7 @@ import Navbar from '../../Components/Navbar'
 import { signupAuth, clearError } from '../../Redux/Auth/AuthSlice'
 import SignupImage from '../../Assets/LandingSectionImages/SignupImg.png'
 import AuthBg from '../../Assets/LandingSectionImages/AuthBg.png'
+import toast from 'react-hot-toast'
 
 // INDIAN STATES + UNION TERRITORIES
 const indianStates = [
@@ -56,7 +57,7 @@ const indianStates = [
 //animation
 const pageEase = [0.16, 1, 0.3, 1]
 
-function Signup({ onLogin }) {
+function Signup ({ onLogin }) {
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
@@ -189,6 +190,7 @@ function Signup({ onLogin }) {
         })
       ).unwrap()
 
+      toast.success('Account created successfully.')
       navigate('/login', {
         state: {
           signupSuccess: true
@@ -196,6 +198,11 @@ function Signup({ onLogin }) {
       })
     } catch (error) {
       console.error('Signup failed:', error)
+      toast.error(
+        typeof error === 'string'
+          ? error
+          : error?.message || 'Unable to create account. Please try again.'
+      )
     }
   }
 
@@ -832,7 +839,7 @@ function Signup({ onLogin }) {
 // FORM FIELD
 // ============================================================
 
-function FormField({ label, state, message, children }) {
+function FormField ({ label, state, message, children }) {
   return (
     <div className='min-w-0'>
       <label
@@ -883,7 +890,7 @@ function FormField({ label, state, message, children }) {
 // INPUT CLASS
 // ============================================================
 
-function inputClass(state) {
+function inputClass (state) {
   const base = `
     h-[46px]
     w-full
@@ -933,7 +940,7 @@ function inputClass(state) {
 // PASSWORD TOGGLE
 // ============================================================
 
-function PasswordToggle({ visible, onClick }) {
+function PasswordToggle ({ visible, onClick }) {
   return (
     <button
       type='button'
@@ -968,7 +975,7 @@ function PasswordToggle({ visible, onClick }) {
 // PASSWORD RULE
 // ============================================================
 
-function Rule({ valid, children }) {
+function Rule ({ valid, children }) {
   return (
     <span
       className={`

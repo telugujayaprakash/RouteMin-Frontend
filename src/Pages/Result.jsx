@@ -25,9 +25,9 @@ import {
   runOptimization
 } from '../Redux/Optimisation/OptimisationSlice'
 import LoadingComponent from '../Components/LoadingComponent'
+import toast from 'react-hot-toast'
 
-
-function Result() {
+function Result () {
   const { id } = useParams()
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -49,9 +49,15 @@ function Result() {
   }
 
   const statusIcons = {
-    COMPLETED: <CheckCircleIcon size={14} weight='fill' className='text-emerald-500' />,
-    RUNNING: <SpinnerGapIcon size={14} className='animate-spin text-blue-500' />,
-    FAILED: <WarningCircleIcon size={14} weight='fill' className='text-rose-500' />
+    COMPLETED: (
+      <CheckCircleIcon size={14} weight='fill' className='text-emerald-500' />
+    ),
+    RUNNING: (
+      <SpinnerGapIcon size={14} className='animate-spin text-blue-500' />
+    ),
+    FAILED: (
+      <WarningCircleIcon size={14} weight='fill' className='text-rose-500' />
+    )
   }
 
   // ================= TRY VAM FLOW FOR PREMIUM USERS =================
@@ -61,10 +67,14 @@ function Result() {
     try {
       setIsVamRunning(true)
 
-      const matrixData = await dispatch(fetchOptimizationMatrix(optimizationRunId)).unwrap()
+      const matrixData = await dispatch(
+        fetchOptimizationMatrix(optimizationRunId)
+      ).unwrap()
 
       const payload = {
-        runName: matrixData.runName ? `${matrixData.runName} (VAM)` : 'Optimization Run (VAM)',
+        runName: matrixData.runName
+          ? `${matrixData.runName} (VAM)`
+          : 'Optimization Run (VAM)',
         algorithm: 'VAM',
         factories: (matrixData.factories || []).map(f => ({
           factoryId: f.factoryId,
@@ -85,11 +95,16 @@ function Result() {
       const res = await dispatch(runOptimization(payload)).unwrap()
 
       if (res?.optimizationRunId) {
+        toast.success('Optimization completed successfully.')
         navigate(`/result/${res.optimizationRunId}`)
       }
     } catch (err) {
       console.error('Failed to re-run optimization with VAM:', err)
-      alert(err || 'Failed to re-run optimization with VAM.')
+      toast.error(
+        typeof err === 'string'
+          ? err
+          : err?.message || 'Failed to re-run optimization with VAM.'
+      )
     } finally {
       setIsVamRunning(false)
     }
@@ -114,18 +129,26 @@ function Result() {
 
       link.remove()
       window.URL.revokeObjectURL(url)
+      toast.success('Report downloaded successfully.')
     } catch (err) {
       console.error('Download failed:', err)
+      toast.error('Unable to download report. Please try again.')
     }
   }
 
   const handlegenerate = async optimizationRunId => {
     try {
       setIsExporting(true)
-      await dispatch(generatereport(optimizationRunId))
+      await dispatch(generatereport(optimizationRunId)).unwrap()
+      toast.success('Report generated successfully.')
       await handleDownload(optimizationRunId)
     } catch (err) {
       console.error('ERROR during report generation:', err)
+      toast.error(
+        typeof err === 'string'
+          ? err
+          : err?.message || 'Unable to generate report. Please try again.'
+      )
     } finally {
       setIsExporting(false)
     }
@@ -156,9 +179,13 @@ function Result() {
   if (!result) return null
 
   const allocations = result.allocations ?? []
-  const isVAM = String(result.algorithm || '').toUpperCase().includes('VAM')
+  const isVAM = String(result.algorithm || '')
+    .toUpperCase()
+    .includes('VAM')
 
-  const statusColor = statusColors[result.status] || 'bg-slate-100 text-slate-700 border-slate-200'
+  const statusColor =
+    statusColors[result.status] ||
+    'bg-slate-100 text-slate-700 border-slate-200'
   const statusIcon = statusIcons[result.status] || null
 
   return (
@@ -171,7 +198,11 @@ function Result() {
             onClick={() => navigate('/optimization-history')}
             className='group mb-2.5 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-blue-600 transition-colors cursor-pointer'
           >
-            <ArrowLeftIcon size={14} weight='bold' className='transition-transform group-hover:-translate-x-1' />
+            <ArrowLeftIcon
+              size={14}
+              weight='bold'
+              className='transition-transform group-hover:-translate-x-1'
+            />
             <span>Back to Optimization History</span>
           </button>
 
@@ -191,12 +222,25 @@ function Result() {
                 </span>
 
                 <span
-                  className={`inline-flex items-center gap-1 rounded-md px-2.5 py-0.5 text-[11px] font-extrabold ${isVAM
-                    ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                    : 'bg-amber-50 text-amber-800 border border-amber-200'
-                    }`}
+                  className={`inline-flex items-center gap-1 rounded-md px-2.5 py-0.5 text-[11px] font-extrabold ${
+                    isVAM
+                      ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                      : 'bg-amber-50 text-amber-800 border border-amber-200'
+                  }`}
                 >
-                  {isVAM ? <SparkleIcon size={13} weight='fill' className='text-purple-600' /> : <LightningIcon size={13} weight='fill' className='text-amber-500' />}
+                  {isVAM ? (
+                    <SparkleIcon
+                      size={13}
+                      weight='fill'
+                      className='text-purple-600'
+                    />
+                  ) : (
+                    <LightningIcon
+                      size={13}
+                      weight='fill'
+                      className='text-amber-500'
+                    />
+                  )}
                   <span>{result.algorithm}</span>
                 </span>
               </div>

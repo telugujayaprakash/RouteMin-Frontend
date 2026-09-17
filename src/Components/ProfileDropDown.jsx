@@ -1,8 +1,15 @@
 import React, { useRef, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { UserIcon, GearIcon, SignOutIcon, CaretRightIcon, ReceiptIcon } from '@phosphor-icons/react'
+import {
+  UserIcon,
+  GearIcon,
+  SignOutIcon,
+  CaretRightIcon,
+  ReceiptIcon
+} from '@phosphor-icons/react'
 import { logout } from '../Redux/Auth/AuthSlice'
+import toast from 'react-hot-toast'
 
 function ProfileDropDown ({ isOpen, onClose }) {
   const dispatch = useDispatch()
@@ -34,6 +41,7 @@ function ProfileDropDown ({ isOpen, onClose }) {
 
   const handleLogout = () => {
     dispatch(logout())
+    toast.success('Logged out successfully.')
     onClose()
   }
 

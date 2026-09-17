@@ -25,8 +25,9 @@ import ErrorCard from '../Components/ErrorCard'
 import LoadingComponent from '../Components/LoadingComponent'
 import StatCard from '../Components/StatCard'
 import api from '../api/config'
+import toast from 'react-hot-toast'
 
-function Reports() {
+function Reports () {
   const dispatch = useDispatch()
 
   const { reports, isLoading, error } = useSelector(state => state.Reports)
@@ -115,57 +116,61 @@ function Reports() {
 
     const endDate = toDate ? new Date(`${toDate}T23:59:59.999`) : null
 
-    return reportList.filter(report => {
-      // ---------------------------------------------
-      // SEARCH
-      // ---------------------------------------------
+    return reportList
+      .filter(report => {
+        // ---------------------------------------------
+        // SEARCH
+        // ---------------------------------------------
 
-      const matchesSearch =
-        !query ||
-        String(report.runName || '')
-          .toLowerCase()
-          .includes(query) ||
-        String(report.algorithm || '')
-          .toLowerCase()
-          .includes(query) ||
-        String(report.generatedBy || '')
-          .toLowerCase()
-          .includes(query) ||
-        String(report.fileName || '')
-          .toLowerCase()
-          .includes(query) ||
-        String(report.optimizationRunId || '')
-          .toLowerCase()
-          .includes(query)
+        const matchesSearch =
+          !query ||
+          String(report.runName || '')
+            .toLowerCase()
+            .includes(query) ||
+          String(report.algorithm || '')
+            .toLowerCase()
+            .includes(query) ||
+          String(report.generatedBy || '')
+            .toLowerCase()
+            .includes(query) ||
+          String(report.fileName || '')
+            .toLowerCase()
+            .includes(query) ||
+          String(report.optimizationRunId || '')
+            .toLowerCase()
+            .includes(query)
 
-      // ---------------------------------------------
-      // ALGORITHM
-      // ---------------------------------------------
+        // ---------------------------------------------
+        // ALGORITHM
+        // ---------------------------------------------
 
-      const reportAlgorithm = String(report.algorithm || '').toUpperCase()
+        const reportAlgorithm = String(report.algorithm || '').toUpperCase()
 
-      const matchesAlgorithm =
-        algorithm === 'ALL' || reportAlgorithm === algorithm
+        const matchesAlgorithm =
+          algorithm === 'ALL' || reportAlgorithm === algorithm
 
-      // ---------------------------------------------
-      // DATE
-      // ---------------------------------------------
+        // ---------------------------------------------
+        // DATE
+        // ---------------------------------------------
 
-      const reportDate = formatDateInput(report.createdAt || report.generatedAt)
+        const reportDate = formatDateInput(
+          report.createdAt || report.generatedAt
+        )
 
-      const matchesFromDate =
-        !startDate || (reportDate && reportDate >= startDate)
+        const matchesFromDate =
+          !startDate || (reportDate && reportDate >= startDate)
 
-      const matchesToDate = !endDate || (reportDate && reportDate <= endDate)
+        const matchesToDate = !endDate || (reportDate && reportDate <= endDate)
 
-      return (
-        matchesSearch && matchesAlgorithm && matchesFromDate && matchesToDate
-      )
-    }).sort((a, b) => {
-      const dateA = new Date(a.createdAt || a.generatedAt || 0).getTime()
-      const dateB = new Date(b.createdAt || b.generatedAt || 0).getTime()
-      return dateB - dateA
-    })
+        return (
+          matchesSearch && matchesAlgorithm && matchesFromDate && matchesToDate
+        )
+      })
+      .sort((a, b) => {
+        const dateA = new Date(a.createdAt || a.generatedAt || 0).getTime()
+        const dateB = new Date(b.createdAt || b.generatedAt || 0).getTime()
+        return dateB - dateA
+      })
   }, [reportList, search, algorithm, fromDate, toDate])
 
   // =========================================================
@@ -245,6 +250,7 @@ function Reports() {
       }, 1000)
     } catch (error) {
       console.error('Unable to open report:', error)
+      toast.error('Unable to open report. Please try again.')
     }
   }
   const totalPages = Math.ceil(filteredReports.length / ITEMS_PER_PAGE)
@@ -258,13 +264,22 @@ function Reports() {
   }, [filteredReports, currentPage])
 
   // DOWNLOAD REPORT
-  const handleDownload = report => {
-    dispatch(
-      downloadreportsbyId({
-        optimizationRunId: report.optimizationRunId,
-        runName: report.runName
-      })
-    )
+  const handleDownload = async report => {
+    try {
+      await dispatch(
+        downloadreportsbyId({
+          optimizationRunId: report.optimizationRunId,
+          runName: report.runName
+        })
+      ).unwrap()
+      toast.success('Report downloaded successfully.')
+    } catch (error) {
+      toast.error(
+        typeof error === 'string'
+          ? error
+          : error?.message || 'Unable to download report. Please try again.'
+      )
+    }
   }
   // =========================================================
   // DELETE REPORT
@@ -275,8 +290,10 @@ function Reports() {
       await dispatch(deletereports(optimizationRunId)).unwrap()
 
       dispatch(fetchreports())
+      toast.success('Report deleted successfully.')
     } catch (error) {
       console.error('Delete report failed:', error)
+      toast.error('Unable to delete report. Please try again.')
     }
   }
 
@@ -391,8 +408,8 @@ function Reports() {
                   subtitle={
                     latestReport
                       ? formatDate(
-                        latestReport.createdAt || latestReport.generatedAt
-                      )
+                          latestReport.createdAt || latestReport.generatedAt
+                        )
                       : 'No reports'
                   }
                   icon={DatabaseIcon}
@@ -630,9 +647,10 @@ function Reports() {
 
                             <td className='px-6 py-4'>
                               <span
-                                className={`inline-flex items-center rounded-lg border px-2.5 py-1 text-[10px] font-bold ${algorithmStyles[algorithmValue] ||
+                                className={`inline-flex items-center rounded-lg border px-2.5 py-1 text-[10px] font-bold ${
+                                  algorithmStyles[algorithmValue] ||
                                   'border-slate-200 bg-slate-50 text-slate-600'
-                                  }`}
+                                }`}
                               >
                                 {algorithmValue || 'N/A'}
                               </span>

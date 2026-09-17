@@ -20,10 +20,12 @@ import { deletefactory } from '../Redux/Factory/FactorySlice'
 import LoadingComponent from '../Components/LoadingComponent'
 import FactoryModal from '../Components/Entities/FactoryModel'
 import { Icon } from '@iconify/react'
+import toast from 'react-hot-toast'
 
 function FactoryManagement () {
   const dispatch = useDispatch()
-  const factories = useSelector(state => state.Factory.factories)
+  const rawFactories = useSelector(state => state.Factory.factories)
+  const factories = Array.isArray(rawFactories) ? rawFactories : []
   const isLoading = useSelector(state => state.Factory.isLoading)
   const error = useSelector(state => state.Factory.error)
 
@@ -35,7 +37,7 @@ function FactoryManagement () {
 
   useEffect(() => {
     dispatch(fetchfactory())
-  }, [])
+  }, [dispatch])
 
   const handleEditFactory = factory => {
     setFactoryModal({
@@ -56,7 +58,8 @@ function FactoryManagement () {
   ).length
 
   const totalSupply = factories.reduce(
-    (total, factory) => total + factory.maximumSupplyCapacity,
+    (total, factory) =>
+      total + Number(factory.maximumSupplyCapacity ?? factory.supply ?? 0),
     0
   )
 
@@ -111,13 +114,18 @@ function FactoryManagement () {
     try {
       if (factoryModal.mode === 'add') {
         await dispatch(postfactory(data)).unwrap()
+        toast.success('Factory created successfully.')
       } else {
+        const factoryId = factoryModal.factory?.id || factoryModal.factory?._id
+
         await dispatch(
           updatefactory({
-            id: factoryModal.factory.id,
+            id: factoryId,
+            factoryData: data,
             data
           })
         ).unwrap()
+        toast.success('Factory updated successfully.')
       }
 
       setFactoryModal({
@@ -128,6 +136,11 @@ function FactoryManagement () {
       dispatch(fetchfactory())
     } catch (error) {
       console.error('Factory save failed:', error)
+      toast.error(
+        typeof error === 'string'
+          ? error
+          : error?.message || 'Unable to save factory. Please try again.'
+      )
     }
   }
 
@@ -237,6 +250,7 @@ function FactoryManagement () {
               mode={factoryModal.mode}
               initialData={factoryModal.factory}
               onSubmit={handleFactorySubmit}
+              loading={isLoading}
               onClose={() =>
                 setFactoryModal({
                   open: false,

@@ -31,9 +31,10 @@ export const fetchwarehouse = createAsyncThunk("warehouse/fetchwarehouse", async
 });
 
 //Update Warehouse Slice
-export const updatewarehouse = createAsyncThunk("warehouse/updatewarehouse", async ({ id, warehouseData }, { rejectWithValue }) => {
+export const updatewarehouse = createAsyncThunk("warehouse/updatewarehouse", async ({ id, warehouseData, data }, { rejectWithValue }) => {
     try {
-        const response = await api.put(`/api/v1/warehouses/${id}`, warehouseData);
+        const payload = warehouseData || data;
+        const response = await api.put(`/api/v1/warehouses/${id}`, payload);
         return response.data;
     } catch (error) {
         return rejectWithValue(
@@ -107,11 +108,27 @@ const WarehouseSlice = createSlice({
             })
             .addCase(updatewarehouse.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.warehouses = action.payload;
+                state.error = null;
+                if (Array.isArray(action.payload)) {
+                    state.warehouses = action.payload;
+                } else if (action.payload && typeof action.payload === 'object') {
+                    const updated = action.payload.warehouse || action.payload.data || action.payload;
+                    const id = updated.id || updated._id;
+                    if (id && Array.isArray(state.warehouses)) {
+                        const index = state.warehouses.findIndex(w => (w.id || w._id) === id);
+                        if (index !== -1) {
+                            state.warehouses[index] = updated;
+                        } else {
+                            state.warehouses.push(updated);
+                        }
+                    }
+                }
             })
             .addCase(updatewarehouse.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.error.message;
+                state.error = action.payload ||
+                    action.error.message ||
+                    'Something went Wrong!';
             })
             //Delete Warehouses
             .addCase(deletewarehouse.pending, (state) => {
@@ -120,7 +137,15 @@ const WarehouseSlice = createSlice({
             })
             .addCase(deletewarehouse.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.warehouses = action.payload;
+                state.error = null;
+                if (Array.isArray(action.payload)) {
+                    state.warehouses = action.payload;
+                } else if (Array.isArray(state.warehouses)) {
+                    const deleteId = action.meta?.arg?.id;
+                    if (deleteId) {
+                        state.warehouses = state.warehouses.filter(w => (w.id || w._id) !== deleteId);
+                    }
+                }
             })
             .addCase(deletewarehouse.rejected, (state, action) => {
                 state.isLoading = false;

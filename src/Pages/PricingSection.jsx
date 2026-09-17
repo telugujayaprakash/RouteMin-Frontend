@@ -20,8 +20,9 @@ import {
 } from '../Redux/Payments/PaymentSlice'
 
 import { fetchCurrentUser } from '../Redux/Auth/AuthSlice'
+import toast from 'react-hot-toast'
 
-function PricingSection() {
+function PricingSection () {
   const dispatch = useDispatch()
 
   const user = useSelector(state => state.Auth?.user)
@@ -199,10 +200,16 @@ function PricingSection() {
       await dispatch(fetchCurrentUser(user.userId)).unwrap()
 
       console.log('Current user refreshed after payment.')
+      toast.success(
+        payment.plan === 'SUBSCRIPTION'
+          ? 'Premium subscription activated successfully.'
+          : 'Optimization credits added successfully.'
+      )
 
       setLoadingPlan(null)
     } catch (error) {
       console.error('Payment verification failed:', error)
+      toast.error('Payment failed. Please try again.')
 
       setLoadingPlan(null)
     }
@@ -290,6 +297,7 @@ function PricingSection() {
 
       razorpay.on('payment.failed', response => {
         console.error('Razorpay payment failed:', response.error)
+        toast.error('Payment failed. Please try again.')
 
         setLoadingPlan(null)
       })
@@ -297,6 +305,7 @@ function PricingSection() {
       razorpay.open()
     } catch (error) {
       console.error('Payment creation failed:', error)
+      toast.error('Payment failed. Please try again.')
 
       setLoadingPlan(null)
     }
@@ -404,9 +413,10 @@ function PricingSection() {
                   hover:-translate-y-1
                   hover:shadow-xl
 
-                  ${plan.popular
-                    ? 'ring-2 ring-purple-500/10 lg:-translate-y-2'
-                    : ''
+                  ${
+                    plan.popular
+                      ? 'ring-2 ring-purple-500/10 lg:-translate-y-2'
+                      : ''
                   }
 
                   ${plan.disabled ? 'opacity-[0.88]' : ''}
@@ -676,13 +686,14 @@ function PricingSection() {
                     transition-all
                     duration-300
 
-                    ${isCurrentPremium || isCurrentTopUp
-                      ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
-                      : plan.id === 'SUBSCRIPTION'
+                    ${
+                      isCurrentPremium || isCurrentTopUp
+                        ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+                        : plan.id === 'SUBSCRIPTION'
                         ? 'bg-purple-600 text-white hover:bg-purple-700'
                         : plan.id === 'TOP_UP'
-                          ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                          : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                        ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                        : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                     }
 
                     disabled:cursor-not-allowed
@@ -742,7 +753,7 @@ function PricingSection() {
 // DATE BLOCK
 // =============================================================
 
-function DateBlock({ label, value }) {
+function DateBlock ({ label, value }) {
   return (
     <div className='bg-white px-4 py-3'>
       <p className='text-[9px] font-bold uppercase tracking-wider text-slate-400'>

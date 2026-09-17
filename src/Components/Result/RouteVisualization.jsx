@@ -14,7 +14,7 @@ import {
   CheckCircleIcon
 } from '@phosphor-icons/react'
 
-function RouteVisualization({ allocations = [] }) {
+function RouteVisualization ({ allocations = [] }) {
   const routes = Array.isArray(allocations) ? allocations : []
 
   const [selectedRoute, setSelectedRoute] = useState(null)
@@ -199,10 +199,11 @@ function RouteVisualization({ allocations = [] }) {
               <button
                 type='button'
                 onClick={() => setView('flow')}
-                className={`rounded-lg px-4 text-xs font-semibold transition-all ${view === 'flow'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-800'
-                  }`}
+                className={`rounded-lg px-4 text-xs font-semibold transition-all ${
+                  view === 'flow'
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
               >
                 Flow Map
               </button>
@@ -210,10 +211,11 @@ function RouteVisualization({ allocations = [] }) {
               <button
                 type='button'
                 onClick={() => setView('matrix')}
-                className={`rounded-lg px-4 text-xs font-semibold transition-all ${view === 'matrix'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-800'
-                  }`}
+                className={`rounded-lg px-4 text-xs font-semibold transition-all ${
+                  view === 'matrix'
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
               >
                 Matrix View
               </button>
@@ -253,9 +255,7 @@ function RouteVisualization({ allocations = [] }) {
               formatCurrency={formatCurrency}
             />
 
-            {/* ==================================================
-                INSPECTOR
-            ================================================== */}
+            {/* INSPECTOR*/}
 
             <AnimatePresence>
               {selectedRoute && (
@@ -386,7 +386,7 @@ function RouteVisualization({ allocations = [] }) {
    DESKTOP FLOW MAP
 ================================================================ */
 
-function DesktopFlowMap({
+function DesktopFlowMap ({
   factories,
   warehouses,
   allFactories,
@@ -641,7 +641,7 @@ function DesktopFlowMap({
    ROUTE PATH
 ================================================================ */
 
-function RoutePath({ path, index, selected, dimmed, onClick }) {
+function RoutePath ({ path, index, selected, dimmed, onClick }) {
   const duration = 2.8 + (index % 4) * 0.35
 
   const delay = (index % 5) * 0.25
@@ -715,7 +715,7 @@ function RoutePath({ path, index, selected, dimmed, onClick }) {
    FACTORY NODE
 ================================================================ */
 
-function FlowFactoryNode({ factory, top, formatNumber }) {
+function FlowFactoryNode ({ factory, top, formatNumber }) {
   return (
     <motion.div
       initial={{
@@ -774,7 +774,7 @@ function FlowFactoryNode({ factory, top, formatNumber }) {
    WAREHOUSE NODE
 ================================================================ */
 
-function FlowWarehouseNode({ warehouse, top, formatNumber }) {
+function FlowWarehouseNode ({ warehouse, top, formatNumber }) {
   return (
     <motion.div
       initial={{
@@ -833,7 +833,7 @@ function FlowWarehouseNode({ warehouse, top, formatNumber }) {
    ROUTE INSPECTOR
 ================================================================ */
 
-function RouteInspector({ route, onClose, formatNumber, formatCurrency }) {
+function RouteInspector ({ route, onClose, formatNumber, formatCurrency }) {
   return (
     <motion.div
       initial={{
@@ -959,14 +959,15 @@ function RouteInspector({ route, onClose, formatNumber, formatCurrency }) {
    DETAIL ROW
 ================================================================ */
 
-function DetailRow({ label, value, highlight = false }) {
+function DetailRow ({ label, value, highlight = false }) {
   return (
     <div className='flex items-center justify-between gap-4 px-5 py-3.5'>
       <span className='text-xs text-slate-500'>{label}</span>
 
       <span
-        className={`text-sm font-bold ${highlight ? 'text-emerald-600' : 'text-slate-800'
-          }`}
+        className={`text-sm font-bold ${
+          highlight ? 'text-emerald-600' : 'text-slate-800'
+        }`}
       >
         {value}
       </span>
@@ -978,19 +979,21 @@ function DetailRow({ label, value, highlight = false }) {
    METRIC
 ================================================================ */
 
-function Metric({ label, value, primary = false }) {
+function Metric ({ label, value, primary = false }) {
   return (
     <div
-      className={`min-w-[90px] rounded-xl border px-3.5 py-2.5 ${primary ? 'border-blue-100 bg-blue-50/70' : 'border-slate-200 bg-white'
-        }`}
+      className={`min-w-[90px] rounded-xl border px-3.5 py-2.5 ${
+        primary ? 'border-blue-100 bg-blue-50/70' : 'border-slate-200 bg-white'
+      }`}
     >
       <p className='text-[9px] font-bold uppercase tracking-wider text-slate-400'>
         {label}
       </p>
 
       <p
-        className={`mt-1 text-sm font-bold ${primary ? 'text-blue-600' : 'text-slate-900'
-          }`}
+        className={`mt-1 text-sm font-bold ${
+          primary ? 'text-blue-600' : 'text-slate-900'
+        }`}
       >
         {value}
       </p>
@@ -1002,7 +1005,7 @@ function Metric({ label, value, primary = false }) {
    LEGEND
 ================================================================ */
 
-function LegendItem({ type, label }) {
+function LegendItem ({ type, label }) {
   const styles = {
     blue: 'bg-blue-500',
     gray: 'bg-slate-300',
@@ -1022,7 +1025,7 @@ function LegendItem({ type, label }) {
    MATRIX VIEW
 ================================================================ */
 
-function AllocationMatrix({
+function AllocationMatrix ({
   factories,
   warehouses,
   routes,
@@ -1121,7 +1124,7 @@ function AllocationMatrix({
    MOBILE VIEW
 ================================================================ */
 
-function MobileFlowList({ routes, formatNumber, formatCurrency }) {
+function MobileFlowList ({ routes, formatNumber, formatCurrency }) {
   return (
     <div className='divide-y divide-slate-200 bg-slate-50 lg:hidden'>
       {routes.map((route, index) => (
@@ -1206,19 +1209,21 @@ function MobileFlowList({ routes, formatNumber, formatCurrency }) {
   )
 }
 
-function MobileStat({ label, value, border = false, green = false }) {
+function MobileStat ({ label, value, border = false, green = false }) {
   return (
     <div
-      className={`px-3 py-3 ${border ? 'border-l border-slate-200' : ''} ${green ? 'bg-emerald-50/70' : 'bg-white'
-        }`}
+      className={`px-3 py-3 ${border ? 'border-l border-slate-200' : ''} ${
+        green ? 'bg-emerald-50/70' : 'bg-white'
+      }`}
     >
       <p className='text-[9px] font-bold uppercase tracking-wider text-slate-400'>
         {label}
       </p>
 
       <p
-        className={`mt-1 text-xs font-bold ${green ? 'text-emerald-600' : 'text-slate-800'
-          }`}
+        className={`mt-1 text-xs font-bold ${
+          green ? 'text-emerald-600' : 'text-slate-800'
+        }`}
       >
         {value}
       </p>

@@ -15,8 +15,15 @@ import {
 import AuthBg from '../../Assets/LandingSectionImages/AuthBg.png'
 import { useNavigate, useLocation } from 'react-router-dom'
 import Navbar from '../../Components/Navbar'
-import { loginAuth, forgotPassword, verifyOtp, resetPassword, clearError } from '../../Redux/Auth/AuthSlice'
+import {
+  loginAuth,
+  forgotPassword,
+  verifyOtp,
+  resetPassword,
+  clearError
+} from '../../Redux/Auth/AuthSlice'
 import LoginImg from '../../Assets/LandingSectionImages/LoginImg.png'
+import toast from 'react-hot-toast'
 
 /* =========================================================
    STEPS
@@ -61,7 +68,7 @@ const passwordRules = [
   }
 ]
 
-function Login() {
+function Login () {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const authLoading = useSelector(state => state.Auth?.isLoading)
@@ -194,7 +201,7 @@ function Login() {
      LOGIN
   ======================================================= */
 
-  const handleLogin = event => {
+  const handleLogin = async event => {
     event.preventDefault()
 
     clearMessages()
@@ -214,12 +221,21 @@ function Login() {
       return
     }
 
-    dispatch(
-      loginAuth({
-        email: email.trim(),
-        password
-      })
-    )
+    try {
+      await dispatch(
+        loginAuth({
+          email: email.trim(),
+          password
+        })
+      ).unwrap()
+      toast.success('Login successful.')
+    } catch (error) {
+      toast.error(
+        typeof error === 'string'
+          ? error
+          : error?.message || 'Unable to log in. Please try again.'
+      )
+    }
   }
 
   /* =======================================================
@@ -243,14 +259,24 @@ function Login() {
     setActionLoading(true)
 
     try {
-      const res = await dispatch(forgotPassword({ email: email.trim() })).unwrap()
+      const res = await dispatch(
+        forgotPassword({ email: email.trim() })
+      ).unwrap()
 
-      setSuccessMessage(res?.message || 'OTP sent successfully to your registered email.')
+      toast.success('OTP sent successfully.')
+      setSuccessMessage(
+        res?.message || 'OTP sent successfully to your registered email.'
+      )
       setStep(STEPS.OTP)
       setOtp('')
       setResendTimer(30)
       resetTouched()
     } catch (error) {
+      toast.error(
+        typeof error === 'string'
+          ? error
+          : error?.message || 'Unable to send verification code.'
+      )
       setLocalError(error || 'Unable to send verification code.')
     } finally {
       setActionLoading(false)
@@ -278,12 +304,20 @@ function Login() {
     setActionLoading(true)
 
     try {
-      const res = await dispatch(verifyOtp({ email: email.trim(), otp })).unwrap()
+      const res = await dispatch(
+        verifyOtp({ email: email.trim(), otp })
+      ).unwrap()
 
+      toast.success('OTP verified successfully.')
       setSuccessMessage(res?.message || 'Email verified successfully.')
       setStep(STEPS.RESET)
       resetTouched()
     } catch (error) {
+      toast.error(
+        typeof error === 'string'
+          ? error
+          : error?.message || 'Unable to verify the code.'
+      )
       setLocalError(error || 'Unable to verify the code.')
     } finally {
       setActionLoading(false)
@@ -302,12 +336,22 @@ function Login() {
     setActionLoading(true)
 
     try {
-      const res = await dispatch(forgotPassword({ email: email.trim() })).unwrap()
+      const res = await dispatch(
+        forgotPassword({ email: email.trim() })
+      ).unwrap()
 
-      setSuccessMessage(res?.message || 'A new verification code has been sent.')
+      toast.success('OTP sent successfully.')
+      setSuccessMessage(
+        res?.message || 'A new verification code has been sent.'
+      )
       setResendTimer(30)
       setOtp('')
     } catch (error) {
+      toast.error(
+        typeof error === 'string'
+          ? error
+          : error?.message || 'Unable to resend verification code.'
+      )
       setLocalError(error || 'Unable to resend verification code.')
     } finally {
       setActionLoading(false)
@@ -349,6 +393,7 @@ function Login() {
         })
       ).unwrap()
 
+      toast.success('Password reset successfully.')
       setSuccessMessage(res?.message || 'Password reset successfully.')
 
       setTimeout(() => {
@@ -363,6 +408,11 @@ function Login() {
         setSuccessMessage('')
       }, 1400)
     } catch (error) {
+      toast.error(
+        typeof error === 'string'
+          ? error
+          : error?.message || 'Unable to reset password.'
+      )
       setLocalError(error || 'Unable to reset password.')
     } finally {
       setActionLoading(false)
@@ -866,10 +916,11 @@ function Login() {
                             outline-none
                             transition-all
                             placeholder:text-slate-300
-                            ${touched.otp && !isOtpValid
+                            ${
+                              touched.otp && !isOtpValid
                                 ? 'border-rose-300 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10'
                                 : 'border-slate-200 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-600/10'
-                              }
+                            }
                           `}
                           />
 
@@ -1029,7 +1080,7 @@ function Login() {
    FIELD
 ========================================================= */
 
-function Field({
+function Field ({
   label,
   type,
   value,
@@ -1064,9 +1115,10 @@ function Field({
           outline-none
           transition-all
           placeholder:text-slate-400
-          ${error
-            ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500 focus:bg-white focus:ring-4 focus:ring-rose-500/10'
-            : 'border-slate-200 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-600/10'
+          ${
+            error
+              ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500 focus:bg-white focus:ring-4 focus:ring-rose-500/10'
+              : 'border-slate-200 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-600/10'
           }
         `}
       />
@@ -1082,7 +1134,7 @@ function Field({
    PASSWORD FIELD
 ========================================================= */
 
-function PasswordField({
+function PasswordField ({
   label,
   value,
   show,
@@ -1118,9 +1170,10 @@ function PasswordField({
             outline-none
             transition-all
             placeholder:text-slate-400
-            ${error
-              ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500 focus:bg-white focus:ring-4 focus:ring-rose-500/10'
-              : 'border-slate-200 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-600/10'
+            ${
+              error
+                ? 'border-rose-300 bg-rose-50/30 focus:border-rose-500 focus:bg-white focus:ring-4 focus:ring-rose-500/10'
+                : 'border-slate-200 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-600/10'
             }
           `}
         />
@@ -1153,7 +1206,7 @@ function PasswordField({
    PASSWORD REQUIREMENTS
 ========================================================= */
 
-function PasswordRequirements({ password, validation, strength }) {
+function PasswordRequirements ({ password, validation, strength }) {
   return (
     <div className='-mt-2 rounded-xl border border-slate-100 bg-slate-50/70 px-3.5 py-3'>
       <div className='mb-2 flex items-center justify-between'>
@@ -1163,12 +1216,13 @@ function PasswordRequirements({ password, validation, strength }) {
 
         {password && (
           <span
-            className={`text-[10px] font-bold ${strength.label === 'Strong'
+            className={`text-[10px] font-bold ${
+              strength.label === 'Strong'
                 ? 'text-emerald-600'
                 : strength.label === 'Good'
-                  ? 'text-amber-600'
-                  : 'text-rose-600'
-              }`}
+                ? 'text-amber-600'
+                : 'text-rose-600'
+            }`}
           >
             {strength.label}
           </span>
@@ -1188,7 +1242,7 @@ function PasswordRequirements({ password, validation, strength }) {
   )
 }
 
-function Requirement({ valid, label }) {
+function Requirement ({ valid, label }) {
   return (
     <div
       className={`
@@ -1229,7 +1283,7 @@ function Requirement({ valid, label }) {
    RECOVERY PROGRESS
 ========================================================= */
 
-function RecoveryProgress({ step }) {
+function RecoveryProgress ({ step }) {
   const current = step === STEPS.EMAIL ? 1 : step === STEPS.OTP ? 2 : 3
 
   return (
@@ -1248,9 +1302,10 @@ function RecoveryProgress({ step }) {
                 text-[9px]
                 font-bold
                 transition-all
-                ${item <= current
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-100 text-slate-400'
+                ${
+                  item <= current
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-slate-100 text-slate-400'
                 }
               `}
             >
@@ -1290,7 +1345,7 @@ function RecoveryProgress({ step }) {
    FEEDBACK
 ========================================================= */
 
-function Feedback({ error, success }) {
+function Feedback ({ error, success }) {
   if (!error && !success) return null
 
   if (error) {
@@ -1362,7 +1417,7 @@ function Feedback({ error, success }) {
    PRIMARY BUTTON
 ========================================================= */
 
-function PrimaryButton({ children, loading }) {
+function PrimaryButton ({ children, loading }) {
   return (
     <button
       type='submit'
