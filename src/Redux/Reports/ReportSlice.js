@@ -81,7 +81,7 @@ export const generatereport = createAsyncThunk("reports/generatereport", async (
 export const deletereports = createAsyncThunk("reports/deletereports", async (optimizationRunId, { rejectWithValue }) => {
     try {
         const response = await api.delete(`/api/v1/reports/run/${optimizationRunId}`);
-        return response.data;
+        return optimizationRunId;
     } catch (error) {
         return rejectWithValue(
             error.response?.data?.message ||
@@ -118,15 +118,12 @@ const ReportSlice = createSlice({
             })
             //Download Reports
             .addCase(downloadreportsbyId.pending, (state) => {
-                state.isLoading = true;
                 state.error = null;
             })
             .addCase(downloadreportsbyId.fulfilled, (state) => {
-                state.isLoading = false;
                 state.error = null;
             })
             .addCase(downloadreportsbyId.rejected, (state, action) => {
-                state.isLoading = false;
                 state.error = action.payload ||
                     action.error.message ||
                     'Something went Wrong!'
@@ -148,17 +145,14 @@ const ReportSlice = createSlice({
             })
             //Delete Reports
             .addCase(deletereports.pending, (state) => {
-                state.isLoading = true;
                 state.error = null;
             })
             .addCase(deletereports.fulfilled, (state, action) => {
-                state.isLoading = false;
                 state.reports = state.reports.filter(
                     report => report.optimizationRunId !== action.payload
                 );
             })
             .addCase(deletereports.rejected, (state, action) => {
-                state.isLoading = false;
                 state.error = action.payload ||
                     action.error.message ||
                     'Something went Wrong!'

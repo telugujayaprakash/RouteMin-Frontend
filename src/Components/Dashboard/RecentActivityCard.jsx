@@ -15,7 +15,7 @@ function RecentActivityCard({ logs = [] }) {
   const displayLogs = logs.slice(0, 5)
 
   return (
-    <div className='rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm flex flex-col justify-between min-h-[320px]'>
+    <div className='rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm flex flex-col min-h-[320px]'>
       {/* HEADER */}
       <div className='flex items-center justify-between mb-6'>
         <div className='flex items-center gap-2'>

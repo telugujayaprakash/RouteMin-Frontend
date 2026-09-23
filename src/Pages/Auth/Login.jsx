@@ -65,6 +65,11 @@ const passwordRules = [
     key: 'special',
     label: 'One special character',
     test: password => /[^A-Za-z0-9]/.test(password)
+  },
+  {
+    key: 'noSpaces',
+    label: 'No spaces allowed',
+    test: password => !/\s/.test(password)
   }
 ]
 
@@ -100,10 +105,10 @@ function Login () {
   ======================================================= */
 
   const isEmailValid = useMemo(() => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+    return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,254}$/.test(email.trim()) && !/\s/.test(email)
   }, [email])
 
-  const loginPasswordValid = password.length >= 8
+  const loginPasswordValid = password.length >= 8 && !/\s\s/.test(password) && !/\s/.test(password)
 
   const isOtpValid = /^\d{6}$/.test(otp)
 
@@ -175,6 +180,12 @@ function Login () {
 
     return () => clearInterval(timer)
   }, [resendTimer])
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearError())
+    }
+  }, [dispatch])
 
   /* =======================================================
      HELPERS
@@ -495,7 +506,7 @@ function Login () {
     >
       <Navbar />
 
-      <main className='w-full pt-20 pb-6 sm:pt-22 sm:pb-8 lg:py-0 px-4 sm:px-6 flex-1 flex items-center justify-center'>
+      <main className='w-full pt-28 pb-6 sm:pt-28 sm:pb-8 lg:pt-20 lg:pb-8 px-4 sm:px-6 flex-1 flex items-center justify-center'>
         <motion.div
           initial={{
             opacity: 0,
@@ -714,8 +725,13 @@ function Login () {
                           type='email'
                           value={email}
                           placeholder='name@company.com'
-                          error={touched.email && !isEmailValid}
-                          errorText='Enter a valid email address.'
+                          error={touched.email && (!isEmailValid || /\s/.test(email) || /[^a-zA-Z0-9._%+-@]/.test(email.split('@')[0] || ''))}
+                          errorText={
+                            /\s/.test(email) ? 'Spaces are not allowed.' :
+                            /[^a-zA-Z0-9._%+-@]/.test(email.split('@')[0] || '') ? 'Special characters are not allowed.' :
+                            'Enter a valid email address.'
+                          }
+                          maxLength={254}
                           onChange={event => {
                             setEmail(event.target.value)
                             setLocalError('')
@@ -733,6 +749,11 @@ function Login () {
                           }
                           placeholder='Enter your password'
                           error={touched.password && !loginPasswordValid}
+                          errorText={
+                            password.length < 8 ? 'Password must contain at least 8 characters.' :
+                            /\s/.test(password) ? 'Spaces are not allowed.' : 'Invalid password.'
+                          }
+                          maxLength={128}
                           onChange={event => {
                             setPassword(event.target.value)
                             setLocalError('')
@@ -740,12 +761,6 @@ function Login () {
                           }}
                           onBlur={() => markTouched('password')}
                         />
-
-                        {touched.password && !loginPasswordValid && (
-                          <p className='-mt-3 text-[11px] text-rose-600'>
-                            Password must contain at least 8 characters.
-                          </p>
-                        )}
 
                         {/* Forgot Password */}
 
@@ -776,7 +791,7 @@ function Login () {
                         )}
 
                         <PrimaryButton loading={authLoading}>
-                          Login
+                          Sign In
                         </PrimaryButton>
 
                         <p className='pt-2 text-center text-xs text-slate-500'>
@@ -789,6 +804,7 @@ function Login () {
                             text-blue-600
                             hover:text-blue-700
                             hover:underline
+                            cursor-pointer
                           '
                           >
                             Sign up
@@ -882,6 +898,7 @@ function Login () {
                         <div>
                           <label className='mb-2 block text-xs font-semibold text-slate-700'>
                             Verification code
+                            <span className='ml-1 text-red-500'>*</span>
                           </label>
 
                           <input
@@ -1088,12 +1105,14 @@ function Field ({
   error,
   errorText,
   onChange,
-  onBlur
+  onBlur,
+  maxLength
 }) {
   return (
     <div>
       <label className='mb-2 block text-xs font-semibold text-slate-700'>
         {label}
+        <span className='ml-1 text-red-500'>*</span>
       </label>
 
       <input
@@ -1101,6 +1120,7 @@ function Field ({
         value={value}
         placeholder={placeholder}
         autoComplete={type === 'email' ? 'email' : undefined}
+        maxLength={maxLength}
         onChange={onChange}
         onBlur={onBlur}
         className={`
@@ -1141,13 +1161,16 @@ function PasswordField ({
   onToggle,
   placeholder,
   error,
+  errorText,
   onChange,
-  onBlur
+  onBlur,
+  maxLength
 }) {
   return (
     <div>
       <label className='mb-2 block text-xs font-semibold text-slate-700'>
         {label}
+        <span className='ml-1 text-red-500'>*</span>
       </label>
 
       <div className='relative'>
@@ -1155,6 +1178,7 @@ function PasswordField ({
           type={show ? 'text' : 'password'}
           value={value}
           placeholder={placeholder}
+          maxLength={maxLength}
           onChange={onChange}
           onBlur={onBlur}
           className={`
@@ -1192,12 +1216,17 @@ function PasswordField ({
             text-slate-400
             transition-colors
             hover:text-slate-700
+            z-10
           '
           aria-label={show ? 'Hide password' : 'Show password'}
         >
           {show ? <EyeSlash size={17} /> : <Eye size={17} />}
         </button>
       </div>
+
+      {error && errorText && (
+        <p className='mt-1.5 text-[11px] text-rose-600'>{errorText}</p>
+      )}
     </div>
   )
 }

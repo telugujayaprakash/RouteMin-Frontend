@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
@@ -84,8 +84,6 @@ function Signup ({ onLogin }) {
 
   const validation = useMemo(() => {
     const cleanName = fullname.trim()
-    const cleanPhone = phoneno.replace(/\D/g, '')
-    const cleanEmail = email.trim()
 
     const nameValid =
       cleanName.length >= 2 &&
@@ -93,18 +91,20 @@ function Signup ({ onLogin }) {
       /^[A-Za-z]+(?:[ '-][A-Za-z]+)*$/.test(cleanName)
 
     const phoneValid =
-      cleanPhone.length === 10 && /^[6-9]\d{9}$/.test(cleanPhone)
+      phoneno.length === 10 && /^[6-9]\d{9}$/.test(phoneno)
 
     const emailValid =
-      cleanEmail.length <= 100 &&
-      /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(cleanEmail)
+      email.length <= 254 &&
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,254}$/.test(email) &&
+      !/\s/.test(email)
 
     const passwordRules = {
       length: password.length >= 8,
       uppercase: /[A-Z]/.test(password),
       lowercase: /[a-z]/.test(password),
       number: /[0-9]/.test(password),
-      special: /[^A-Za-z0-9]/.test(password)
+      special: /[^A-Za-z0-9]/.test(password),
+      noSpaces: !/\s/.test(password)
     }
 
     const passwordValid =
@@ -112,7 +112,8 @@ function Signup ({ onLogin }) {
       passwordRules.uppercase &&
       passwordRules.lowercase &&
       passwordRules.number &&
-      passwordRules.special
+      passwordRules.special &&
+      passwordRules.noSpaces
 
     const confirmValid =
       confirmpassword.length > 0 && confirmpassword === password
@@ -158,6 +159,12 @@ function Signup ({ onLogin }) {
 
     return valid ? 'valid' : 'invalid'
   }
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearError())
+    }
+  }, [dispatch])
 
   // ==========================================================
   // SIGNUP
@@ -212,7 +219,7 @@ function Signup ({ onLogin }) {
       className='min-h-screen lg:h-screen lg:max-h-screen bg-slate-50/50 flex flex-col justify-between selection:bg-blue-500 selection:text-white bg-cover bg-center overflow-y-auto lg:overflow-hidden'
     >
       <Navbar />
-      <main className='w-full pt-20 pb-6 sm:pt-22 sm:pb-8 lg:py-0 px-4 sm:px-6 flex-1 flex items-center justify-center'>
+      <main className='w-full pt-28 pb-6 sm:pt-28 sm:pb-8 lg:pt-20 lg:pb-8 px-4 sm:px-6 flex-1 flex items-center justify-center'>
         <motion.div
           initial={{
             opacity: 0,
@@ -423,7 +430,7 @@ function Signup ({ onLogin }) {
                       state={getState('fullname', validation.nameValid)}
                       message={
                         touched.fullname && !validation.nameValid
-                          ? 'Enter a valid name.'
+                          ? 'Name must be between 2 and 50 characters.'
                           : null
                       }
                     >
@@ -448,30 +455,38 @@ function Signup ({ onLogin }) {
                       label='Phone number'
                       state={getState('phoneno', validation.phoneValid)}
                       message={
-                        touched.phoneno && !validation.phoneValid
+                        touched.phoneno && /\s/.test(phoneno)
+                          ? 'Spaces are not allowed.'
+                          : touched.phoneno && /[()+-]/.test(phoneno)
+                          ? 'Special characters are not allowed.'
+                          : touched.phoneno && !validation.phoneValid
                           ? 'Enter a valid 10-digit number.'
                           : null
                       }
                     >
-                      <input
-                        type='tel'
-                        value={phoneno}
-                        placeholder='98765 43210'
-                        autoComplete='tel'
-                        maxLength={15}
-                        onChange={e => {
-                          const value = e.target.value
+                      <div className='relative flex items-center'>
+                        <span className='absolute left-3.5 text-[13px] font-medium text-slate-500'>
+                          +91
+                        </span>
+                        <input
+                          type='tel'
+                          value={phoneno}
+                          autoComplete='tel'
+                          maxLength={15}
+                          onChange={e => {
+                            const value = e.target.value
 
-                          if (/^[0-9+\-\s()]*$/.test(value)) {
-                            setPhoneno(value)
-                            clearServerError()
-                          }
-                        }}
-                        onBlur={() => markTouched('phoneno')}
-                        className={inputClass(
-                          getState('phoneno', validation.phoneValid)
-                        )}
-                      />
+                            if (/^[\d\s()+-]*$/.test(value)) {
+                              setPhoneno(value)
+                              clearServerError()
+                            }
+                          }}
+                          onBlur={() => markTouched('phoneno')}
+                          className={`${inputClass(
+                            getState('phoneno', validation.phoneValid)
+                          )} pl-10`}
+                        />
+                      </div>
                     </FormField>
                   </div>
 
@@ -482,7 +497,11 @@ function Signup ({ onLogin }) {
                       label='Email address'
                       state={getState('email', validation.emailValid)}
                       message={
-                        touched.email && !validation.emailValid
+                        touched.email && /\s/.test(email)
+                          ? 'Spaces are not allowed.'
+                          : touched.email && /[^a-zA-Z0-9._%+-@]/.test(email.split('@')[0] || '')
+                          ? 'Special characters are not allowed.'
+                          : touched.email && !validation.emailValid
                           ? 'Enter a valid email address.'
                           : null
                       }
@@ -492,7 +511,7 @@ function Signup ({ onLogin }) {
                         value={email}
                         placeholder='you@company.com'
                         autoComplete='email'
-                        maxLength={100}
+                        maxLength={254}
                         onChange={e => {
                           setEmail(e.target.value)
                           clearServerError()
@@ -545,6 +564,15 @@ function Signup ({ onLogin }) {
                     <FormField
                       label='Password'
                       state={getState('password', validation.passwordValid)}
+                      message={
+                        touched.password && !validation.passwordValid
+                          ? !validation.passwordRules.length
+                            ? 'Password must be at least 8 characters.'
+                            : !validation.passwordRules.noSpaces
+                            ? 'Spaces are not allowed.'
+                            : 'Password does not meet requirements.'
+                          : null
+                      }
                     >
                       <div className='relative'>
                         <input
@@ -552,6 +580,7 @@ function Signup ({ onLogin }) {
                           value={password}
                           placeholder='Create a password'
                           autoComplete='new-password'
+                          maxLength={128}
                           onChange={e => {
                             setPassword(e.target.value)
                             clearServerError()
@@ -588,8 +617,9 @@ function Signup ({ onLogin }) {
                         <input
                           type={showConfirmPassword ? 'text' : 'password'}
                           value={confirmpassword}
-                          placeholder='Repeat your password'
+                          placeholder='Confirm password'
                           autoComplete='new-password'
+                          maxLength={128}
                           onChange={e => {
                             setConfirmPassword(e.target.value)
                             clearServerError()
@@ -852,6 +882,7 @@ function FormField ({ label, state, message, children }) {
         '
       >
         {label}
+        <span className='ml-1 text-red-500'>*</span>
       </label>
 
       {children}

@@ -276,6 +276,17 @@ function NewOptimization () {
     const activeRoutes =
       routesList && routesList.length > 0 ? routesList : routes
 
+    const invalidRoute = activeRoutes.find(
+      route =>
+        !route.restricted &&
+        (route.costPerUnit === '' || route.costPerUnit === null || Number(route.costPerUnit) < 0 || isNaN(Number(route.costPerUnit)))
+    )
+
+    if (invalidRoute) {
+      alert('Please enter a valid cost per unit for all unrestricted routes.')
+      return
+    }
+
     if (!activeRoutes || activeRoutes.length === 0) {
       const fallbackRoutes = selectedFactories.flatMap(f =>
         selectedWarehouses.map(w => ({
@@ -299,8 +310,11 @@ function NewOptimization () {
   ============================================================ */
 
   const handleBack = () => {
-    setStep(previousStep => Math.max(previousStep - 1, 1))
-
+    if (step === 1) {
+      setShowSetup(true)
+    } else {
+      setStep(previousStep => Math.max(previousStep - 1, 1))
+    }
     scrollToTop()
   }
 
@@ -399,12 +413,21 @@ function NewOptimization () {
             />
           </div>
 
-          <BottomBarAction
-            disabled={!canContinue}
-            onClick={() => handleFactoriesNext(selectedFactories)}
-          >
-            Continue to Warehouses
-          </BottomBarAction>
+          <div className='ml-auto flex items-center gap-2'>
+            <button
+              type='button'
+              onClick={handleBack}
+              className='inline-flex h-10 items-center justify-center rounded-xl bg-slate-100 px-4 text-xs font-bold text-slate-600 transition-all hover:bg-slate-200 active:scale-[0.97] sm:h-[42px] sm:px-5'
+            >
+              Back
+            </button>
+            <BottomBarAction
+              disabled={!canContinue}
+              onClick={() => handleFactoriesNext(selectedFactories)}
+            >
+              Continue to Warehouses
+            </BottomBarAction>
+          </div>
         </BottomBar>
       )
     }
@@ -466,12 +489,21 @@ function NewOptimization () {
             />
           </div>
 
-          <BottomBarAction
-            disabled={!canContinue}
-            onClick={() => handleWarehousesNext(selectedWarehouses)}
-          >
-            Continue to Cost Matrix
-          </BottomBarAction>
+          <div className='ml-auto flex items-center gap-2'>
+            <button
+              type='button'
+              onClick={handleBack}
+              className='inline-flex h-10 items-center justify-center rounded-xl bg-slate-100 px-4 text-xs font-bold text-slate-600 transition-all hover:bg-slate-200 active:scale-[0.97] sm:h-[42px] sm:px-5'
+            >
+              Back
+            </button>
+            <BottomBarAction
+              disabled={!canContinue}
+              onClick={() => handleWarehousesNext(selectedWarehouses)}
+            >
+              Continue to Cost Matrix
+            </BottomBarAction>
+          </div>
         </BottomBar>
       )
     }
@@ -479,7 +511,18 @@ function NewOptimization () {
     /* STEP 3 */
 
     const canContinue =
-      selectedFactories.length > 0 && selectedWarehouses.length > 0
+      selectedFactories.length > 0 &&
+      selectedWarehouses.length > 0 &&
+      routes.length > 0 &&
+      routes.every(
+        r =>
+          r.restricted ||
+          (r.costPerUnit !== '' &&
+            r.costPerUnit !== null &&
+            r.costPerUnit !== undefined &&
+            !isNaN(Number(r.costPerUnit)) &&
+            Number(r.costPerUnit) >= 0)
+      )
 
     return (
       <BottomBar>
@@ -515,12 +558,21 @@ function NewOptimization () {
           />
         </div>
 
-        <BottomBarAction
-          disabled={!canContinue}
-          onClick={() => handleMatrixNext(routes)}
-        >
-          Continue to Algorithm
-        </BottomBarAction>
+        <div className='ml-auto flex items-center gap-2'>
+          <button
+            type='button'
+            onClick={handleBack}
+            className='inline-flex h-10 items-center justify-center rounded-xl bg-slate-100 px-4 text-xs font-bold text-slate-600 transition-all hover:bg-slate-200 active:scale-[0.97] sm:h-[42px] sm:px-5'
+          >
+            Back
+          </button>
+          <BottomBarAction
+            disabled={!canContinue}
+            onClick={() => handleMatrixNext(routes)}
+          >
+            Continue to Algorithm
+          </BottomBarAction>
+        </div>
       </BottomBar>
     )
   }
@@ -858,7 +910,16 @@ function NewOptimization () {
 ================================================================ */
 
 function OptimizationIntro ({ value, onChange, onStart }) {
-  const canStart = value.trim().length > 0
+  const [touched, setTouched] = useState(false)
+  
+  let errorMessage = ''
+  if (touched && !value.trim()) {
+    errorMessage = 'Optimization run name is required'
+  } else if (touched && !/^[A-Za-z0-9\s]{3,50}$/.test(value.trim())) {
+    errorMessage = 'Only letters, numbers, and spaces are allowed (3-50 chars)'
+  }
+
+  const canStart = /^[A-Za-z0-9\s]{3,50}$/.test(value.trim())
 
   return (
     <div
@@ -975,7 +1036,11 @@ function OptimizationIntro ({ value, onChange, onStart }) {
                   autoFocus
                   type='text'
                   value={value}
-                  onChange={event => onChange(event.target.value)}
+                  onBlur={() => setTouched(true)}
+                  onChange={event => {
+                    setTouched(true)
+                    onChange(event.target.value)
+                  }}
                   onKeyDown={event => {
                     if (event.key === 'Enter' && canStart) {
                       onStart()
@@ -983,36 +1048,20 @@ function OptimizationIntro ({ value, onChange, onStart }) {
                   }}
                   maxLength={100}
                   placeholder='e.g. Q3 Regional Distribution'
-                  className='
-                    mt-2
-                    h-12
-                    w-full
-                    rounded-xl
-
-                    border
-                    border-slate-200
-
-                    bg-slate-50
-
-                    px-4
-
-                    text-sm
-                    font-medium
-                    text-slate-900
-
-                    outline-none
-
-                    transition-all
-                    duration-200
-
-                    placeholder:text-slate-400
-
-                    focus:border-blue-500
-                    focus:bg-white
-                    focus:ring-4
-                    focus:ring-blue-500/10
-                  '
+                  className={`
+                    mt-2 h-12 w-full rounded-xl border px-4 text-sm font-medium outline-none transition-all duration-200 placeholder:text-slate-400
+                    ${errorMessage
+                      ? 'border-rose-400 bg-rose-50/50 text-rose-900 focus:border-rose-600 focus:ring-4 focus:ring-rose-500/20'
+                      : 'border-slate-200 bg-slate-50 text-slate-900 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10'}
+                  `}
                 />
+
+                {errorMessage && (
+                  <p className='mt-1.5 text-[11px] font-bold text-rose-600 flex items-center gap-1'>
+                    <span>•</span>
+                    {errorMessage}
+                  </p>
+                )}
 
                 <div
                   className='
@@ -1402,7 +1451,6 @@ function BottomBarAction ({ children, disabled, onClick }) {
       onClick={onClick}
       className='
         group
-        ml-auto
         inline-flex
         shrink-0
         items-center

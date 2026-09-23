@@ -110,7 +110,7 @@ function InvoiceTable () {
             <Receipt size={20} className='text-blue-600' weight='duotone' />
 
             <h3 className='text-lg font-bold text-slate-900'>
-              Billing & Invoices
+              Invoices
             </h3>
           </div>
 
@@ -118,11 +118,6 @@ function InvoiceTable () {
             View and download your RouteMin subscription receipts.
           </p>
         </div>
-
-        <span className='inline-flex items-center gap-1.5 self-start rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 sm:self-center'>
-          <CheckCircle size={14} weight='fill' />
-          Account Active
-        </span>
       </div>
 
       {/* TABLE */}

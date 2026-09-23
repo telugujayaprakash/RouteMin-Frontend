@@ -26,7 +26,7 @@ function CostMatrixTable ({ factories = [], warehouses = [], onChange, onBack, o
         row.routes.map(route => ({
           factoryId: row.factoryId,
           warehouseId: route.warehouseId,
-          costPerUnit: Number(route.costPerUnit || 0),
+          costPerUnit: route.costPerUnit === '' || route.costPerUnit === null ? '' : Number(route.costPerUnit),
           restricted: route.restricted
         }))
       )
@@ -40,7 +40,7 @@ function CostMatrixTable ({ factories = [], warehouses = [], onChange, onBack, o
         row.routes.map(route => ({
           factoryId: row.factoryId,
           warehouseId: route.warehouseId,
-          costPerUnit: Number(route.costPerUnit || 0),
+          costPerUnit: route.costPerUnit === '' || route.costPerUnit === null ? '' : Number(route.costPerUnit),
           restricted: route.restricted
         }))
       )
@@ -148,48 +148,71 @@ function CostMatrixTable ({ factories = [], warehouses = [], onChange, onBack, o
 
                 {row.routes.map(route => (
                   <td key={route.warehouseId} className='px-4 py-4'>
-                    <div className='rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5 shadow-2xs transition-all hover:bg-white hover:border-slate-300'>
-                      <div className='flex items-center justify-between mb-2'>
-                        <span className='text-[10px] font-bold uppercase text-slate-400'>Lane</span>
-                        <button
-                          type='button'
-                          onClick={() =>
-                            toggleRestriction(row.factoryId, route.warehouseId)
-                          }
-                          className='cursor-pointer p-0.5'
-                          title={route.restricted ? 'Route Restricted' : 'Route Open'}
-                        >
-                          {route.restricted ? (
-                            <LockSimpleIcon
-                              size={16}
-                              weight='fill'
-                              className='text-rose-500'
-                            />
-                          ) : (
-                            <LockSimpleOpenIcon
-                              size={16}
-                              className='text-emerald-600'
-                            />
-                          )}
-                        </button>
-                      </div>
+                    {(() => {
+                      const valStr = route.costPerUnit;
+                      let errorMessage = '';
+                      if (!route.restricted && (valStr === '' || valStr === null || valStr === undefined)) {
+                        errorMessage = 'Cost is required';
+                      }
 
-                      <input
-                        type='text'
-                        inputMode='numeric'
-                        value={route.costPerUnit ?? ''}
-                        disabled={route.restricted}
-                        onChange={e =>
-                          updateCost(
-                            row.factoryId,
-                            route.warehouseId,
-                            e.target.value.replace(/[^0-9.]/g, '')
-                          )
-                        }
-                        placeholder='₹ Cost/unit'
-                        className='w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-900 shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.03)] outline-none transition-all focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 disabled:bg-slate-100 disabled:text-slate-400 placeholder:text-slate-400'
-                      />
-                    </div>
+                      return (
+                        <div className={`rounded-xl border bg-slate-50/50 p-3.5 shadow-2xs transition-all hover:bg-white ${
+                          errorMessage ? 'border-rose-300' : 'border-slate-200/80 hover:border-slate-300'
+                        }`}>
+                          <div className='flex items-center justify-between mb-2'>
+                            <span className='text-[10px] font-bold uppercase text-slate-400'>Lane</span>
+                            <button
+                              type='button'
+                              onClick={() =>
+                                toggleRestriction(row.factoryId, route.warehouseId)
+                              }
+                              className='cursor-pointer p-0.5'
+                              title={route.restricted ? 'Route Restricted' : 'Route Open'}
+                            >
+                              {route.restricted ? (
+                                <LockSimpleIcon
+                                  size={16}
+                                  weight='fill'
+                                  className='text-rose-500'
+                                />
+                              ) : (
+                                <LockSimpleOpenIcon
+                                  size={16}
+                                  className='text-emerald-600'
+                                />
+                              )}
+                            </button>
+                          </div>
+
+                          <input
+                            type='text'
+                            inputMode='numeric'
+                            value={valStr ?? ''}
+                            disabled={route.restricted}
+                            onChange={e =>
+                              updateCost(
+                                row.factoryId,
+                                route.warehouseId,
+                                e.target.value.replace(/[^0-9.]/g, '')
+                              )
+                            }
+                            placeholder='₹ Cost/unit'
+                            className={`w-full rounded-lg border px-3 py-2 text-xs font-semibold shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.03)] outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400 placeholder:text-slate-400 ${
+                              errorMessage 
+                                ? 'border-rose-400 bg-rose-50/50 text-rose-900 focus:border-rose-600 focus:ring-2 focus:ring-rose-500/20' 
+                                : 'border-slate-200 bg-white text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20'
+                            }`}
+                          />
+                          
+                          {errorMessage && (
+                            <p className='mt-1.5 text-[10px] font-bold text-rose-600 flex items-center gap-1'>
+                              <span>•</span>
+                              {errorMessage}
+                            </p>
+                          )}
+                        </div>
+                      )
+                    })()}
                   </td>
                 ))}
               </tr>

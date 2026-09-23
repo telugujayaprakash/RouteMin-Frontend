@@ -25,7 +25,9 @@ import toast from 'react-hot-toast'
 function PricingSection () {
   const dispatch = useDispatch()
 
-  const user = useSelector(state => state.Auth?.user)
+  const { user, isLoading: isUserLoading } = useSelector(
+    state => state.Auth || {}
+  )
 
   const { isCreating, isVerifying, error } = useSelector(
     state => state.Payment || {}
@@ -110,9 +112,6 @@ function PricingSection () {
         '5 optimization runs / month',
         'Least Cost Method (LCM)',
         'North-West Corner Rule (NWCR)',
-        'Factory & warehouse management',
-        'Optimization history',
-        'Basic reports'
       ],
 
       button: isFreePlan ? 'Current Plan' : 'Free Plan',
@@ -136,9 +135,6 @@ function PricingSection () {
         'Least Cost Method (LCM)',
         'North-West Corner Rule (NWCR)',
         "Vogel's Approximation Method (VAM)",
-        'Optimization history',
-        'Detailed reports',
-        'Priority optimization capacity'
       ],
 
       button: isPremiumActive ? 'Current Plan' : 'Upgrade to Premium',
@@ -152,19 +148,19 @@ function PricingSection () {
       name: 'Top Up',
       description: 'Need more runs? Add another block whenever you need.',
       price: 99,
-      period: '/ 30 runs',
+      period: '/ 20 runs',
       icon: PlusCircleIcon,
       color: 'emerald',
 
       features: [
-        '+30 optimization runs',
+        '+20 optimization runs',
         'Use with your current plan',
         'No monthly commitment',
         'Available whenever required',
         'Runs added after successful payment'
       ],
 
-      button: isTopUpActive ? 'Top Up Active' : 'Buy 30 Runs',
+      button: isTopUpActive ? 'Top Up Active' : 'Buy 20 Runs',
 
       /*
        * Top-up should only be available to a Premium user.
@@ -675,7 +671,7 @@ function PricingSection () {
 
                 <button
                   type='button'
-                  disabled={plan.disabled || isLoading}
+                  disabled={plan.disabled || isLoading || isUserLoading}
                   onClick={() => handlePayment(plan)}
                   className={`
                     mt-8 flex h-12 w-full

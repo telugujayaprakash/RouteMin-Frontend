@@ -289,7 +289,6 @@ function Reports () {
     try {
       await dispatch(deletereports(optimizationRunId)).unwrap()
 
-      dispatch(fetchreports())
       toast.success('Report deleted successfully.')
     } catch (error) {
       console.error('Delete report failed:', error)
@@ -532,6 +531,7 @@ function Reports () {
                       <input
                         type='date'
                         value={fromDate}
+                        max={new Date().toISOString().split('T')[0]}
                         onChange={e => setFromDate(e.target.value)}
                         className='h-11 w-full rounded-xl border border-slate-200 bg-slate-50/60 pl-10 pr-3 text-xs font-medium text-slate-700 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10'
                       />
@@ -555,6 +555,7 @@ function Reports () {
                         type='date'
                         value={toDate}
                         min={fromDate || undefined}
+                        max={new Date().toISOString().split('T')[0]}
                         onChange={e => setToDate(e.target.value)}
                         className='h-11 w-full rounded-xl border border-slate-200 bg-slate-50/60 pl-10 pr-3 text-xs font-medium text-slate-700 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10'
                       />

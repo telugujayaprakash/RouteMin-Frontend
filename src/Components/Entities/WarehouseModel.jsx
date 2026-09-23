@@ -56,18 +56,63 @@ function WarehouseModal({
 
   if (!isOpen) return null
 
-  const updateField = (name, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+  const validateData = data => {
+    const newErrors = {}
 
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }))
+    if (!data.warehouseCode.trim()) {
+      newErrors.warehouseCode = 'Warehouse code is required.'
+    } else if (!/^WH\d{3}$/.test(data.warehouseCode.trim())) {
+      newErrors.warehouseCode = 'Must match pattern (e.g., WH001).'
     }
+
+    if (!data.registrationNumber.trim()) {
+      newErrors.registrationNumber = 'Registration number is required.'
+    } else if (!/^REG\d{4}$/.test(data.registrationNumber.trim())) {
+      newErrors.registrationNumber = 'Must match pattern (e.g., REG1001).'
+    }
+
+    if (!data.warehouseName.trim()) {
+      newErrors.warehouseName = 'Warehouse name is required.'
+    } else if (!/^[A-Za-z\s]{2,50}$/.test(data.warehouseName.trim())) {
+      newErrors.warehouseName = 'Only letters and spaces are allowed (max 50).'
+    }
+
+    if (!data.warehouseType.trim()) {
+      newErrors.warehouseType = 'Warehouse type is required.'
+    } else if (!/^[A-Za-z\s]{2,50}$/.test(data.warehouseType.trim())) {
+      newErrors.warehouseType = 'Only letters and spaces are allowed (max 50).'
+    }
+
+    if (!data.address.trim()) {
+      newErrors.address = 'Please select a warehouse location.'
+    }
+
+    if (!data.latitude || !data.longitude) {
+      newErrors.address =
+        'Please search and select the warehouse location on the map.'
+    }
+
+    if (!data.maximumStorageCapacity) {
+      newErrors.maximumStorageCapacity = 'Maximum storage capacity is required.'
+    } else if (Number(data.maximumStorageCapacity) <= 0) {
+      newErrors.maximumStorageCapacity = 'Capacity must be greater than 0.'
+    }
+
+    return newErrors
+  }
+
+  const updateField = (name, value) => {
+    setFormData(prev => {
+      const newData = { ...prev, [name]: value }
+      const newErrors = validateData(newData)
+
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        [name]: newErrors[name] || ''
+      }))
+
+      return newData
+    })
   }
 
   const handleChange = e => {
@@ -76,41 +121,8 @@ function WarehouseModal({
   }
 
   const validate = () => {
-    const newErrors = {}
-
-    if (!formData.warehouseCode.trim()) {
-      newErrors.warehouseCode = 'Warehouse code is required.'
-    }
-
-    if (!formData.registrationNumber.trim()) {
-      newErrors.registrationNumber = 'Registration number is required.'
-    }
-
-    if (!formData.warehouseName.trim()) {
-      newErrors.warehouseName = 'Warehouse name is required.'
-    }
-
-    if (!formData.warehouseType.trim()) {
-      newErrors.warehouseType = 'Warehouse type is required.'
-    }
-
-    if (!formData.address.trim()) {
-      newErrors.address = 'Please select a warehouse location.'
-    }
-
-    if (!formData.latitude || !formData.longitude) {
-      newErrors.address =
-        'Please search and select the warehouse location on the map.'
-    }
-
-    if (!formData.maximumStorageCapacity) {
-      newErrors.maximumStorageCapacity = 'Maximum storage capacity is required.'
-    } else if (Number(formData.maximumStorageCapacity) <= 0) {
-      newErrors.maximumStorageCapacity = 'Capacity must be greater than 0.'
-    }
-
+    const newErrors = validateData(formData)
     setErrors(newErrors)
-
     return Object.keys(newErrors).length === 0
   }
 
@@ -353,7 +365,7 @@ function WarehouseModal({
 
             <button
               type='submit'
-              disabled={isSubmitting}
+              disabled={isSubmitting || Object.values(errors).some(err => err)}
               className='flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-7 text-sm font-bold text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.55)] transition hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60'
             >
               {isSubmitting ? (

@@ -70,62 +70,73 @@ function FactoryModal({
 
   if (!isOpen) return null
 
-  const updateField = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
-
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ''
-      }))
-    }
-  }
-
-  const handleNumberChange = (field, value) => {
-    const numericValue = value.replace(/[^0-9]/g, '')
-
-    updateField(field, numericValue)
-  }
-
-  const validate = () => {
+  const validateData = data => {
     const newErrors = {}
 
-    if (!formData.factoryCode.trim()) {
+    if (!data.factoryCode.trim()) {
       newErrors.factoryCode = 'Factory code is required.'
+    } else if (!/^[A-Za-z0-9]{2,20}$/.test(data.factoryCode.trim())) {
+      newErrors.factoryCode = 'Invalid format. Use alphanumeric characters only (max 20).'
     }
 
-    if (!formData.registrationNumber.trim()) {
+    if (!data.registrationNumber.trim()) {
       newErrors.registrationNumber = 'Registration number is required.'
+    } else if (!/^REG-\d{4}-\d{3}$/.test(data.registrationNumber.trim())) {
+      newErrors.registrationNumber = 'Must match pattern (e.g., REG-2026-001).'
     }
 
-    if (!formData.factoryName.trim()) {
+    if (!data.factoryName.trim()) {
       newErrors.factoryName = 'Factory name is required.'
+    } else if (!/^[A-Za-z\s]{2,50}$/.test(data.factoryName.trim())) {
+      newErrors.factoryName = 'Only letters and spaces are allowed (max 50).'
     }
 
-    if (!formData.factoryType.trim()) {
+    if (!data.factoryType.trim()) {
       newErrors.factoryType = 'Factory type is required.'
+    } else if (!/^[A-Za-z\s]{2,50}$/.test(data.factoryType.trim())) {
+      newErrors.factoryType = 'Only letters and spaces are allowed (max 50).'
     }
 
-    if (!formData.address.trim()) {
+    if (!data.address.trim()) {
       newErrors.address = 'Please select a factory location.'
     }
 
-    if (!formData.latitude || !formData.longitude) {
+    if (!data.latitude || !data.longitude) {
       newErrors.address =
         'Please search and select the factory location on the map.'
     }
 
-    if (!formData.maximumSupplyCapacity) {
+    if (!data.maximumSupplyCapacity) {
       newErrors.maximumSupplyCapacity = 'Maximum supply capacity is required.'
-    } else if (Number(formData.maximumSupplyCapacity) <= 0) {
+    } else if (Number(data.maximumSupplyCapacity) <= 0) {
       newErrors.maximumSupplyCapacity = 'Capacity must be greater than 0.'
     }
 
-    setErrors(newErrors)
+    return newErrors
+  }
 
+  const updateField = (field, value) => {
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value }
+      const newErrors = validateData(newData)
+
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        [field]: newErrors[field] || ''
+      }))
+
+      return newData
+    })
+  }
+
+  const handleNumberChange = (field, value) => {
+    const numericValue = value.replace(/[^0-9]/g, '')
+    updateField(field, numericValue)
+  }
+
+  const validate = () => {
+    const newErrors = validateData(formData)
+    setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
@@ -434,7 +445,7 @@ function FactoryModal({
 
             <button
               type='submit'
-              disabled={loading}
+              disabled={loading || Object.values(errors).some(err => err)}
               className='flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-7 text-sm font-bold text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.55)] transition hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60'
             >
               {loading ? (

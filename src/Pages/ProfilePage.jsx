@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   User,
   EnvelopeSimple,
@@ -36,6 +36,19 @@ function ProfilePage () {
 
   // Interactive Tabs
   const [activeTab, setActiveTab] = useState('profile') // 'profile', 'security', 'billing'
+  const location = useLocation()
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const tab = params.get('tab')
+    if (tab === 'account' || tab === 'profile') {
+      setActiveTab('profile')
+    } else if (tab === 'billing' || tab === 'invoices') {
+      setActiveTab('billing')
+    } else if (tab === 'security') {
+      setActiveTab('security')
+    }
+  }, [location.search])
 
   // Copied State
   const [copiedEmail, setCopiedEmail] = useState(false)
@@ -320,7 +333,7 @@ function ProfilePage () {
           }`}
         >
           <CreditCard size={16} weight='duotone' />
-          <span>Billing & Invoices</span>
+          <span>Invoices</span>
         </button>
       </div>
 

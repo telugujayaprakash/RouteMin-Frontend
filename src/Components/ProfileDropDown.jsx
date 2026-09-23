@@ -34,9 +34,9 @@ function ProfileDropDown ({ isOpen, onClose }) {
 
   if (!isOpen) return null
 
-  const handleNavigateProfile = () => {
+  const handleNavigateProfile = (tab = 'account') => {
     onClose()
-    navigate('/profile')
+    navigate(`/profile?tab=${tab}`)
   }
 
   const handleLogout = () => {
@@ -129,7 +129,7 @@ function ProfileDropDown ({ isOpen, onClose }) {
 
         <button
           type='button'
-          onClick={handleNavigateProfile}
+          onClick={() => handleNavigateProfile('account')}
           className='
             group
             flex w-full
@@ -182,7 +182,7 @@ function ProfileDropDown ({ isOpen, onClose }) {
 
         <button
           type='button'
-          onClick={handleNavigateProfile}
+          onClick={() => handleNavigateProfile('billing')}
           className='
             group
             flex w-full

@@ -40,7 +40,7 @@ function LatestOptimizationCard({ optimization }) {
   // EMPTY STATE
   // =========================================================
 
-  if (!optimization) {
+  if (!optimization || Object.keys(optimization).length === 0 || (!optimization.runId && !optimization.optimizationRunId)) {
     return (
       <section className='overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm'>
         <div className='border-b border-slate-100 px-6 py-5 sm:px-7'>
