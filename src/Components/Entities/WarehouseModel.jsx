@@ -15,7 +15,7 @@ const emptyWarehouse = {
   status: 'ACTIVE'
 }
 
-function WarehouseModal({
+function WarehouseModal ({
   isOpen,
   onClose,
   onSubmit,
@@ -42,9 +42,7 @@ function WarehouseModal({
         latitude: initialData.latitude ?? '',
         longitude: initialData.longitude ?? '',
         maximumStorageCapacity:
-          initialData.maximumStorageCapacity ??
-          initialData.maximumDemand ??
-          '',
+          initialData.maximumStorageCapacity ?? initialData.maximumDemand ?? '',
         status: initialData.status ?? 'ACTIVE'
       })
     } else {
@@ -61,14 +59,18 @@ function WarehouseModal({
 
     if (!data.warehouseCode.trim()) {
       newErrors.warehouseCode = 'Warehouse code is required.'
-    } else if (!/^WH\d{3}$/.test(data.warehouseCode.trim())) {
-      newErrors.warehouseCode = 'Must match pattern (e.g., WH001).'
+    } else if (
+      !/^[A-Za-z0-9-]+( [A-Za-z0-9-]+)*$/.test(data.warehouseCode.trim())
+    ) {
+      newErrors.warehouseCode =
+        'Alphanumeric, hyphens, and single spaces allowed.'
     }
 
     if (!data.registrationNumber.trim()) {
       newErrors.registrationNumber = 'Registration number is required.'
-    } else if (!/^REG\d{4}$/.test(data.registrationNumber.trim())) {
-      newErrors.registrationNumber = 'Must match pattern (e.g., REG1001).'
+    } else if (!/^[A-Za-z0-9]+$/.test(data.registrationNumber.trim())) {
+      newErrors.registrationNumber =
+        'Only alphanumeric characters allowed, no spaces.'
     }
 
     if (!data.warehouseName.trim()) {
@@ -116,7 +118,8 @@ function WarehouseModal({
   }
 
   const handleChange = e => {
-    const { name, value } = e.target
+    let { name, value } = e.target
+    if (name === 'warehouseCode') value = value.toUpperCase()
     updateField(name, value)
   }
 
@@ -133,6 +136,7 @@ function WarehouseModal({
 
     const capacity = Number(formData.maximumStorageCapacity)
     const payload = {
+      ...(isEdit && { id: initialData?.id || initialData?._id }),
       warehouseCode: formData.warehouseCode.trim(),
       warehouseName: formData.warehouseName.trim(),
       warehouseType: formData.warehouseType.trim(),
@@ -213,7 +217,8 @@ function WarehouseModal({
                     name='warehouseCode'
                     value={formData.warehouseCode}
                     onChange={handleChange}
-                    placeholder='WH001'
+                    placeholder='e.g. WH0001'
+                    maxLength={20}
                     className={inputStyle(errors.warehouseCode)}
                   />
                 </FormField>
@@ -228,7 +233,8 @@ function WarehouseModal({
                     name='registrationNumber'
                     value={formData.registrationNumber}
                     onChange={handleChange}
-                    placeholder='REG1001'
+                    placeholder='e.g. AB12345678'
+                    maxLength={20}
                     className={inputStyle(errors.registrationNumber)}
                   />
                 </FormField>
@@ -389,7 +395,7 @@ function WarehouseModal({
 
 /* ================= FORM COMPONENTS ================= */
 
-function FormField({ label, error, children }) {
+function FormField ({ label, error, children }) {
   return (
     <div>
       <label className='mb-2 block text-sm font-semibold text-slate-700'>
@@ -407,9 +413,10 @@ function FormField({ label, error, children }) {
 }
 
 const inputStyle = error =>
-  `h-12 w-full rounded-xl border bg-slate-50/70 px-4 text-sm font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:bg-white focus:ring-4 ${error
-    ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500/10'
-    : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500/10'
+  `h-12 w-full rounded-xl border bg-slate-50/70 px-4 text-sm font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:bg-white focus:ring-4 ${
+    error
+      ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500/10'
+      : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500/10'
   }`
 
 export default WarehouseModal

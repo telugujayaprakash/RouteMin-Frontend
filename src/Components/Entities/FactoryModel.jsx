@@ -7,7 +7,7 @@ import {
 } from '@phosphor-icons/react'
 import LocationPicker from '../Location/LocationPicker'
 
-function FactoryModal({
+function FactoryModal ({
   isOpen,
   onClose,
   onSubmit,
@@ -45,9 +45,7 @@ function FactoryModal({
         latitude: initialData.latitude ?? '',
         longitude: initialData.longitude ?? '',
         maximumSupplyCapacity:
-          initialData.maximumSupplyCapacity ??
-          initialData.supply ??
-          '',
+          initialData.maximumSupplyCapacity ?? initialData.supply ?? '',
         status: initialData.status || 'ACTIVE'
       })
     } else {
@@ -75,14 +73,18 @@ function FactoryModal({
 
     if (!data.factoryCode.trim()) {
       newErrors.factoryCode = 'Factory code is required.'
-    } else if (!/^[A-Za-z0-9]{2,20}$/.test(data.factoryCode.trim())) {
-      newErrors.factoryCode = 'Invalid format. Use alphanumeric characters only (max 20).'
+    } else if (
+      !/^[A-Za-z0-9-]+( [A-Za-z0-9-]+)*$/.test(data.factoryCode.trim())
+    ) {
+      newErrors.factoryCode =
+        'Alphanumeric, hyphens, and single spaces allowed.'
     }
 
     if (!data.registrationNumber.trim()) {
       newErrors.registrationNumber = 'Registration number is required.'
-    } else if (!/^REG-\d{4}-\d{3}$/.test(data.registrationNumber.trim())) {
-      newErrors.registrationNumber = 'Must match pattern (e.g., REG-2026-001).'
+    } else if (!/^[A-Za-z0-9]+$/.test(data.registrationNumber.trim())) {
+      newErrors.registrationNumber =
+        'Only alphanumeric characters allowed, no spaces.'
     }
 
     if (!data.factoryName.trim()) {
@@ -147,6 +149,7 @@ function FactoryModal({
 
     const capacity = Number(formData.maximumSupplyCapacity)
     const payload = {
+      ...(isEdit && { id: initialData?.id || initialData?._id }),
       factoryCode: formData.factoryCode.trim(),
       registrationNumber: formData.registrationNumber.trim(),
       factoryName: formData.factoryName.trim(),
@@ -230,12 +233,16 @@ function FactoryModal({
                   <input
                     type='text'
                     value={formData.factoryCode}
-                    onChange={e => updateField('factoryCode', e.target.value)}
-                    placeholder='e.g. FAC-001'
-                    className={`h-12 w-full rounded-xl border bg-slate-50/50 px-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-4 ${errors.factoryCode
+                    onChange={e =>
+                      updateField('factoryCode', e.target.value.toUpperCase())
+                    }
+                    placeholder='e.g. FAC0001'
+                    maxLength={20}
+                    className={`h-12 w-full rounded-xl border bg-slate-50/50 px-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-4 ${
+                      errors.factoryCode
                         ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500/10'
                         : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500/10'
-                      }`}
+                    }`}
                   />
 
                   {errors.factoryCode && (
@@ -258,11 +265,13 @@ function FactoryModal({
                     onChange={e =>
                       updateField('registrationNumber', e.target.value)
                     }
-                    placeholder='e.g. REG-2026-001'
-                    className={`h-12 w-full rounded-xl border bg-slate-50/50 px-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-4 ${errors.registrationNumber
+                    placeholder='e.g. AB12345678'
+                    maxLength={20}
+                    className={`h-12 w-full rounded-xl border bg-slate-50/50 px-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-4 ${
+                      errors.registrationNumber
                         ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500/10'
                         : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500/10'
-                      }`}
+                    }`}
                   />
 
                   {errors.registrationNumber && (
@@ -284,10 +293,11 @@ function FactoryModal({
                     value={formData.factoryName}
                     onChange={e => updateField('factoryName', e.target.value)}
                     placeholder='e.g. Green Valley Industries'
-                    className={`h-12 w-full rounded-xl border bg-slate-50/50 px-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-4 ${errors.factoryName
+                    className={`h-12 w-full rounded-xl border bg-slate-50/50 px-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-4 ${
+                      errors.factoryName
                         ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500/10'
                         : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500/10'
-                      }`}
+                    }`}
                   />
 
                   {errors.factoryName && (
@@ -309,10 +319,11 @@ function FactoryModal({
                     value={formData.factoryType}
                     onChange={e => updateField('factoryType', e.target.value)}
                     placeholder='e.g. Manufacturing'
-                    className={`h-12 w-full rounded-xl border bg-slate-50/50 px-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-4 ${errors.factoryType
+                    className={`h-12 w-full rounded-xl border bg-slate-50/50 px-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-4 ${
+                      errors.factoryType
                         ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500/10'
                         : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500/10'
-                      }`}
+                    }`}
                   />
 
                   {errors.factoryType && (
@@ -398,10 +409,11 @@ function FactoryModal({
                       )
                     }
                     placeholder='e.g. 5000'
-                    className={`h-12 w-full rounded-xl border bg-slate-50/50 px-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-4 ${errors.maximumSupplyCapacity
+                    className={`h-12 w-full rounded-xl border bg-slate-50/50 px-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-4 ${
+                      errors.maximumSupplyCapacity
                         ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500/10'
                         : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500/10'
-                      }`}
+                    }`}
                   />
 
                   {errors.maximumSupplyCapacity && (

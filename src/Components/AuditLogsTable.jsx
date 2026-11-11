@@ -335,10 +335,6 @@ function AuditLogsTable({ logs = [], loading, itemsPerPage = 8 }) {
                       <p className='text-sm font-bold text-slate-900 transition-colors duration-300 group-hover:text-blue-600'>
                         {log.entityName || 'Unknown Entity'}
                       </p>
-
-                      <p className='mt-1 font-mono text-xs text-slate-400'>
-                        Entity ID #{log.entityId}
-                      </p>
                     </div>
                   </td>
 

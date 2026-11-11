@@ -26,7 +26,7 @@ function CostMatrixTable ({ factories = [], warehouses = [], onChange, onBack, o
         row.routes.map(route => ({
           factoryId: row.factoryId,
           warehouseId: route.warehouseId,
-          costPerUnit: route.costPerUnit === '' || route.costPerUnit === null ? '' : Number(route.costPerUnit),
+          costPerUnit: (route.costPerUnit === '' || route.costPerUnit === null) ? (route.restricted ? 0 : '') : Number(route.costPerUnit),
           restricted: route.restricted
         }))
       )
@@ -40,7 +40,7 @@ function CostMatrixTable ({ factories = [], warehouses = [], onChange, onBack, o
         row.routes.map(route => ({
           factoryId: row.factoryId,
           warehouseId: route.warehouseId,
-          costPerUnit: route.costPerUnit === '' || route.costPerUnit === null ? '' : Number(route.costPerUnit),
+          costPerUnit: (route.costPerUnit === '' || route.costPerUnit === null) ? (route.restricted ? 0 : '') : Number(route.costPerUnit),
           restricted: route.restricted
         }))
       )

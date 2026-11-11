@@ -72,7 +72,8 @@ function SummaryCards({ result, onTryVam, isVamRunning }) {
       },
       {
         title: 'Potential VAM Savings',
-        value: formatCurrency(potentialVamSavings),
+        // value: formatCurrency(potentialVamSavings),
+        value: "Save upto 30%",
         icon: isFree ? CrownIcon : SparkleIcon,
         color: 'amber',
         badgeText: isFree ? 'SUBSCRIBE' : 'TRY VAM',

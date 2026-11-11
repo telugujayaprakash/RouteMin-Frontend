@@ -91,9 +91,14 @@ function CostSummary ({ result, onTryVam, isVamRunning }) {
 
             <h3 className='mt-2 text-lg font-black text-slate-900 sm:text-xl'>
               {isFree
+                ? `Save maximum amount on this shipment run with VAM!`
+                : `Save maximum amount on this shipment run with VAM!`}
+            </h3>
+            {/* <h3 className='mt-2 text-lg font-black text-slate-900 sm:text-xl'>
+              {isFree
                 ? `Save up to ₹ ${formatCurrency(potentialVamSavings)} on this shipment run with VAM!`
                 : `Re-run with VAM to potentially save ₹ ${formatCurrency(potentialVamSavings)}!`}
-            </h3>
+            </h3> */}
 
             <p className='mt-1 text-xs font-medium leading-relaxed text-slate-600 max-w-2xl'>
               {isFree
